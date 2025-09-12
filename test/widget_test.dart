@@ -16,7 +16,7 @@ void main() {
 
     // Verify that our dashboard title exists.
     expect(find.text('Dashboard'), findsOneWidget);
-    
+
     // Verify that navigation items exist.
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Contacts'), findsOneWidget);

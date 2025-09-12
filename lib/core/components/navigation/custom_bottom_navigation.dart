@@ -15,11 +15,11 @@ class CustomBottomNavigation extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final safeAreaBottom = mediaQuery.padding.bottom;
-    
+
     // Dynamic padding values
     final verticalPadding = screenHeight > 800 ? 16.0 : 12.0;
-    final horizontalPadding = mediaQuery.size.width * 0.04; 
-    
+    final horizontalPadding = mediaQuery.size.width * 0.04;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -41,7 +41,7 @@ class CustomBottomNavigation extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(
           top: verticalPadding,
-          bottom: verticalPadding + safeAreaBottom, 
+          bottom: verticalPadding + safeAreaBottom,
           left: horizontalPadding,
           right: horizontalPadding,
         ),
@@ -66,11 +66,7 @@ class CustomBottomNavigation extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: isSelected ? Colors.blue : Colors.grey,
-            size: 24,
-          ),
+          Icon(icon, color: isSelected ? Colors.blue : Colors.grey, size: 24),
           const SizedBox(height: 4),
           Text(
             label,

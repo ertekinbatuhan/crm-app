@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../shared/models/pipeline_model.dart';
+import '../../../models/pipeline_model.dart';
 
 class SalesPipelineCard extends StatelessWidget {
   final List<PipelineStage> stages;
@@ -60,10 +60,7 @@ class SalesPipelineCard extends StatelessWidget {
           ),
           Text(
             period,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 16),
           ...stages.map((stage) => _buildPipelineStage(stage)).toList(),

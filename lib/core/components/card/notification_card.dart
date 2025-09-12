@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../shared/models/notification_model.dart';
+import '../../../models/notification_model.dart';
 
 class NotificationCard extends StatelessWidget {
   final List<NotificationModel> notifications;
 
-  const NotificationCard({
-    super.key,
-    required this.notifications,
-  });
+  const NotificationCard({super.key, required this.notifications});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +34,9 @@ class NotificationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...notifications.map((notification) => _buildNotificationItem(notification)).toList(),
+          ...notifications
+              .map((notification) => _buildNotificationItem(notification))
+              .toList(),
         ],
       ),
     );
@@ -73,10 +72,7 @@ class NotificationCard extends StatelessWidget {
                 ),
                 Text(
                   notification.subtitle,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
             ),
