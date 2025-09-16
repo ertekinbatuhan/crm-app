@@ -1,0 +1,114 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50">
+<div class="relative flex h-auto min-h-screen w-full flex-col justify-between group/design-root overflow-x-hidden bg-white" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="flex-grow">
+<header class="sticky top-0 z-10 bg-white shadow-sm">
+<div class="flex items-center p-4">
+<button class="text-gray-600">
+<span class="material-symbols-outlined"> arrow_back </span>
+</button>
+<h1 class="text-xl font-bold text-gray-900 flex-1 text-center pr-8">Advanced Search</h1>
+</div>
+<div class="px-4 pb-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"> search </span>
+<input class="form-input w-full rounded-full border-gray-200 bg-gray-100 py-3 pl-10 pr-16 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="Search deals, contacts..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600">
+<span class="material-symbols-outlined"> mic </span>
+</button>
+</div>
+</div>
+</header>
+<main class="p-4">
+<section class="mb-6">
+<h2 class="text-sm font-semibold text-gray-500 mb-3 px-2">Quick Filters</h2>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full">All</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full">Contacts</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full">Deals</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full">Tasks</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full">Meetings</button>
+</div>
+</section>
+<section class="mb-6">
+<h2 class="text-sm font-semibold text-gray-500 mb-3 px-2">Recent Searches</h2>
+<div class="space-y-2">
+<div class="flex items-center justify-between rounded-lg bg-gray-100 p-3">
+<p class="text-gray-800">"New leads in California"</p>
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-xl"> close </span>
+</button>
+</div>
+<div class="flex items-center justify-between rounded-lg bg-gray-100 p-3">
+<p class="text-gray-800">"High-priority tasks"</p>
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-xl"> close </span>
+</button>
+</div>
+<div class="flex items-center justify-between rounded-lg bg-gray-100 p-3">
+<p class="text-gray-800">"Meetings this week"</p>
+<button class="text-gray-400 hover:text-gray-600">
+<span class="material-symbols-outlined text-xl"> close </span>
+</button>
+</div>
+</div>
+</section>
+<section>
+<h2 class="text-sm font-semibold text-gray-500 mb-3 px-2">Advanced Filters</h2>
+<div class="space-y-3">
+<details class="group rounded-lg bg-gray-100 p-3">
+<summary class="flex cursor-pointer list-none items-center justify-between font-medium text-gray-800">
+                  Date Range
+                  <span class="transition group-open:rotate-180">
+<span class="material-symbols-outlined"> expand_more </span>
+</span>
+</summary>
+<div class="mt-4 text-gray-700">Here you can add date range pickers.</div>
+</details>
+<details class="group rounded-lg bg-gray-100 p-3">
+<summary class="flex cursor-pointer list-none items-center justify-between font-medium text-gray-800">
+                  Status Filters
+                  <span class="transition group-open:rotate-180">
+<span class="material-symbols-outlined"> expand_more </span>
+</span>
+</summary>
+<div class="mt-4 text-gray-700">Here you can add status checkboxes or dropdowns.</div>
+</details>
+<details class="group rounded-lg bg-gray-100 p-3">
+<summary class="flex cursor-pointer list-none items-center justify-between font-medium text-gray-800">
+                  Owner / Assignment
+                  <span class="transition group-open:rotate-180">
+<span class="material-symbols-outlined"> expand_more </span>
+</span>
+</summary>
+<div class="mt-4 text-gray-700">Here you can add user selection components.</div>
+</details>
+</div>
+</section>
+</main>
+</div>
+<footer class="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+<div class="flex items-center justify-between">
+<button class="text-sm font-medium text-blue-600">Clear All</button>
+<button class="rounded-full bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-md hover:bg-blue-700">
+            Show 42 Results
+          </button>
+<button class="text-sm font-medium text-blue-600">Save</button>
+</div>
+</footer>
+</div>
+
+</body></html>

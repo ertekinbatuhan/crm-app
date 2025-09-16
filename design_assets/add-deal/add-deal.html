@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B600%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+      :root {
+        --select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(107, 114, 128)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');
+      }
+      .form-input {
+        @apply flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 focus:outline-0 focus:ring-2 focus:ring-inset focus:ring-blue-600 border border-gray-300 bg-gray-50 h-12 placeholder:text-gray-500 p-3 text-base font-normal leading-normal;
+      }
+      label {
+        @apply flex flex-col w-full;
+      }
+      .form-label {
+        @apply text-sm font-medium text-gray-700 mb-1;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="flex h-auto min-h-screen w-full flex-col bg-white group/design-root">
+<header class="sticky top-0 z-10 bg-white shadow-sm">
+<div class="flex items-center p-4">
+<button class="flex items-center justify-center rounded-full p-2 text-gray-600 hover:bg-gray-100">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h1 class="flex-1 text-center text-lg font-semibold text-gray-900">New Deal</h1>
+<div class="w-10"></div>
+</div>
+<div class="px-4 pb-4">
+<label class="form-label sr-only" for="deal-value">Deal Value</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-2xl font-bold text-gray-500">$</span>
+<input class="w-full rounded-lg border-gray-300 bg-gray-50 p-3 pl-8 text-2xl font-bold text-gray-900 focus:ring-2 focus:ring-blue-600" id="deal-value" placeholder="Deal value" type="text" value="5,000.00"/>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-4">
+<div class="space-y-8">
+<section>
+<h2 class="text-lg font-semibold text-gray-900 mb-4">Deal Information</h2>
+<div class="space-y-4">
+<label>
+<span class="form-label">Deal name</span>
+<input class="form-input" placeholder="e.g. Website Redesign Project" value=""/>
+</label>
+<label>
+<span class="form-label">Company/Account</span>
+<input class="form-input" placeholder="e.g. Globex Corporation" value=""/>
+</label>
+<label>
+<span class="form-label">Primary contact</span>
+<input class="form-input" placeholder="e.g. John Doe" value=""/>
+</label>
+<label>
+<span class="form-label">Currency</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>USD - US Dollar</option>
+<option>EUR - Euro</option>
+<option>GBP - British Pound</option>
+</select>
+</label>
+</div>
+</section>
+<section>
+<h2 class="text-lg font-semibold text-gray-900 mb-4">Pipeline Settings</h2>
+<div class="space-y-4">
+<label>
+<span class="form-label">Pipeline</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>Sales Pipeline</option>
+<option>Support Pipeline</option>
+</select>
+</label>
+<label>
+<span class="form-label">Current stage</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>Qualification</option>
+<option>Needs Analysis</option>
+<option>Proposal</option>
+<option>Negotiation</option>
+<option>Closed Won</option>
+<option>Closed Lost</option>
+</select>
+</label>
+<label>
+<span class="form-label">Probability (%)</span>
+<input class="form-input" placeholder="e.g. 75" type="number" value=""/>
+</label>
+<label>
+<span class="form-label">Expected close date</span>
+<input class="form-input" type="date" value=""/>
+</label>
+</div>
+</section>
+<section>
+<h2 class="text-lg font-semibold text-gray-900 mb-4">Details</h2>
+<div class="space-y-4">
+<label>
+<span class="form-label">Type</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>New Business</option>
+<option>Existing Business</option>
+</select>
+</label>
+<label>
+<span class="form-label">Lead source</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>Web</option>
+<option>Referral</option>
+<option>Partner</option>
+<option>Advertisement</option>
+</select>
+</label>
+<label>
+<span class="form-label">Competitors</span>
+<input class="form-input" placeholder="e.g. Initech, Vandelay Industries" value=""/>
+</label>
+<label>
+<span class="form-label">Description</span>
+<textarea class="form-input min-h-28" placeholder="Add a description..."></textarea>
+</label>
+</div>
+</section>
+<section>
+<h2 class="text-lg font-semibold text-gray-900 mb-4">Assignment</h2>
+<div class="space-y-4">
+<label>
+<span class="form-label">Deal owner</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>Jane Smith</option>
+<option>Mike Johnson</option>
+</select>
+</label>
+<label>
+<span class="form-label">Team members</span>
+<select class="form-input bg-[image:--select-button-svg]">
+<option>Select team members</option>
+<option>Marketing Team</option>
+<option>Sales Engineers</option>
+</select>
+</label>
+</div>
+</section>
+<section>
+<h2 class="text-lg font-semibold text-gray-900 mb-4">Products/Services</h2>
+<div class="rounded-lg border border-gray-200">
+<div class="p-4">
+<div class="grid grid-cols-5 gap-2 text-xs font-medium text-gray-500">
+<div class="col-span-2">Product</div>
+<div>Qty</div>
+<div>Price</div>
+<div class="text-right">Total</div>
+</div>
+</div>
+<button class="flex w-full items-center gap-2 rounded-b-lg border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-blue-600 hover:bg-gray-100">
+<span class="material-symbols-outlined text-base">add_circle</span>
+                Add line item
+              </button>
+</div>
+</section>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-white py-3 shadow-[0_-2px_4px_rgba(0,0,0,0.05)]">
+<div class="flex items-center justify-end gap-3 px-4">
+<button class="rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">Cancel</button>
+<button class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300">Save as draft</button>
+<button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Save &amp; close</button>
+</div>
+</footer>
+</div>
+
+</body></html>

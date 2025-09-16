@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/theme/app_theme.dart';
 import '../views/dashboard_view.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../viewmodels/contacts_viewmodel.dart';
@@ -111,10 +112,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'CRM Dashboard',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.light,
         home: const DashboardView(),
         navigatorKey: GlobalKey<NavigatorState>(),
       ),

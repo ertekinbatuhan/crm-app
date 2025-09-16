@@ -35,22 +35,21 @@ class AppStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? Colors.white,
         borderRadius: borderRadius ?? BorderRadius.circular(12),
-        boxShadow: boxShadow ?? [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow:
+            boxShadow ??
+            [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (icon != null) ...[
-            icon!,
-            const SizedBox(height: 8),
-          ],
+          if (icon != null) ...[icon!, const SizedBox(height: 8)],
           Text(
             title,
             style: TextStyle(

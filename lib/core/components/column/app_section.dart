@@ -26,8 +26,9 @@ class AppSection<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultEmptyMessage = emptyMessage ?? 'No ${title.toLowerCase()} found';
-    
+    final defaultEmptyMessage =
+        emptyMessage ?? 'No ${title.toLowerCase()} found';
+
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
@@ -41,36 +42,40 @@ class AppSection<T> extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: titleStyle ?? const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style:
+                      titleStyle ??
+                      const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                 ),
                 if (titleSuffix != null) titleSuffix!,
               ],
             ),
           ),
-          
+
           // Content
           if (items.isEmpty && showEmptyState)
             _buildEmptyState(defaultEmptyMessage)
           else
-            ...items.map((item) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+            ...items.map(
+              (item) => Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: itemBuilder(item),
               ),
-              child: itemBuilder(item),
-            )).toList(),
+            ),
         ],
       ),
     );
@@ -84,7 +89,7 @@ class AppSection<T> extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -93,10 +98,7 @@ class AppSection<T> extends StatelessWidget {
       child: Center(
         child: Text(
           message,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 16,
-          ),
+          style: const TextStyle(color: Colors.grey, fontSize: 16),
         ),
       ),
     );

@@ -1,0 +1,146 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+      :root {
+        --primary-color: #197fd2;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); font-family: Inter, &quot;Noto Sans&quot;, sans-serif;">
+<div class="flex-grow">
+<header class="sticky top-0 z-10 bg-white shadow-sm">
+<div class="flex items-center p-4">
+<button class="text-gray-600 hover:text-gray-900">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-lg font-bold text-gray-900 flex-1 text-center pr-8">Task Details</h1>
+</div>
+</header>
+<main class="p-4 space-y-6">
+<div class="flex items-start gap-4">
+<input class="h-6 w-6 mt-2 rounded border-gray-300 text-[var(--primary-color)] focus:ring-[var(--primary-color)]" id="completion-checkbox" type="checkbox"/>
+<input class="form-input text-2xl font-bold text-gray-900 border-none focus:ring-0 p-0 flex-1" value="Follow up with Sarah"/>
+</div>
+<div class="grid grid-cols-2 gap-4 text-sm">
+<div class="flex items-center gap-2 text-gray-500">
+<span class="material-symbols-outlined text-base">priority_high</span>
+<span>Priority: <span class="font-medium text-red-500">High</span></span>
+</div>
+<div class="flex items-center gap-2 text-gray-500">
+<span class="material-symbols-outlined text-base">calendar_today</span>
+<span>Jul 24, 2024, 10:00 AM</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm">
+<h2 class="text-base font-semibold text-gray-900 mb-2">Description</h2>
+<p class="text-gray-600">
+              Follow up with Sarah about the new project proposal. Discuss the next steps and address any questions or concerns she may have.
+            </p>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm">
+<h2 class="text-base font-semibold text-gray-900 mb-4">Details</h2>
+<div class="space-y-3 text-sm">
+<div class="flex justify-between">
+<span class="text-gray-500">Assigned to:</span>
+<span class="font-medium text-gray-800">Alex</span>
+</div>
+<div class="flex justify-between">
+<span class="text-gray-500">Created by:</span>
+<span class="font-medium text-gray-800">Alex</span>
+</div>
+<div class="flex justify-between">
+<span class="text-gray-500">Category:</span>
+<span class="font-medium text-gray-800">Sales</span>
+</div>
+<div class="flex justify-between">
+<span class="text-gray-500">Related to:</span>
+<span class="font-medium text-gray-800">Project Alpha</span>
+</div>
+</div>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm">
+<h2 class="text-base font-semibold text-gray-900 mb-2">Subtasks</h2>
+<div class="space-y-2">
+<label class="flex items-center gap-3">
+<input checked="" class="h-5 w-5 rounded border-gray-300 text-[var(--primary-color)] focus:ring-[var(--primary-color)]" type="checkbox"/>
+<span class="text-gray-800 line-through">Prepare project proposal</span>
+</label>
+<label class="flex items-center gap-3">
+<input class="h-5 w-5 rounded border-gray-300 text-[var(--primary-color)] focus:ring-[var(--primary-color)]" type="checkbox"/>
+<span class="text-gray-800">Schedule follow-up meeting</span>
+</label>
+</div>
+<button class="mt-4 flex items-center gap-2 text-sm font-medium text-[var(--primary-color)] hover:text-blue-700">
+<span class="material-symbols-outlined">add</span>
+              Add Subtask
+            </button>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm">
+<h2 class="text-base font-semibold text-gray-900 mb-4">Attachments</h2>
+<div class="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+<span class="material-symbols-outlined text-4xl text-gray-400">cloud_upload</span>
+<p class="text-gray-700 font-medium">No attachments</p>
+<p class="text-sm text-gray-500">Drag &amp; drop or click to add files</p>
+</div>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm">
+<h2 class="text-base font-semibold text-gray-900 mb-4">Comments</h2>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<img alt="Alex's avatar" class="w-10 h-10 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeg07UEFJQLIJ2wzLv0tlqGnofqGEcmnBmdqmAmaKnIcimfXi7L74vJfTEVtXg2_9ke33-e-xElxZIGa5u8pJ4-2ImEd_l7RVQXZ2GQJc7KWrIopJuKAQbClFDVrkhZFHmVCnfb_Ig17WfwO5cJjgMK7hfD7bP5sh4KpoCsCMJHhZtQGFo-caVn1xpvwOZH1EtID0avu2Fvk0QoY9CJfA0xOPg2i5fv05Dh3l0_v-V2htDnnMLh84JqVin0eEKMxxbO6nPIpNrZpGC"/>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<p class="font-semibold text-gray-800 text-sm">Alex</p>
+<p class="text-xs text-gray-500">2 days ago</p>
+</div>
+<p class="text-sm text-gray-600 mt-1">Initial proposal sent. Waiting for feedback.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-gray-200"></div>
+<div class="flex-1">
+<textarea class="form-textarea w-full rounded-md border-gray-300 focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" placeholder="Add a comment..."></textarea>
+<button class="mt-2 px-4 py-2 text-sm font-medium text-white bg-[var(--primary-color)] rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)]">
+                    Post Comment
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<footer class="sticky bottom-0 bg-white border-t border-gray-200 p-2">
+<div class="grid grid-cols-4 gap-2">
+<button class="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-[var(--primary-color)] py-1 rounded-lg">
+<span class="material-symbols-outlined">save</span>
+<span class="text-xs font-medium">Save</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-[var(--primary-color)] py-1 rounded-lg">
+<span class="material-symbols-outlined">delete</span>
+<span class="text-xs font-medium">Delete</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-[var(--primary-color)] py-1 rounded-lg">
+<span class="material-symbols-outlined">content_copy</span>
+<span class="text-xs font-medium">Duplicate</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-[var(--primary-color)] py-1 rounded-lg">
+<span class="material-symbols-outlined">event</span>
+<span class="text-xs font-medium">To Meeting</span>
+</button>
+</div>
+</footer>
+</div>
+
+</body></html>

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -26,10 +27,14 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.black, size: 24),
-          onPressed: onSettingsPressed ?? () {
-            // Default settings action
-            print('Settings pressed');
-          },
+          onPressed:
+              onSettingsPressed ??
+              () {
+                // Default settings action
+                if (kDebugMode) {
+                  print('Settings pressed');
+                }
+              },
         ),
       ],
     );

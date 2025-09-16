@@ -48,7 +48,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -64,10 +64,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                 gradient: const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF007AFF),
-                    Color(0xFF0056CC),
-                  ],
+                  colors: [Color(0xFF007AFF), Color(0xFF0056CC)],
                 ),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
@@ -85,7 +82,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
@@ -110,301 +107,318 @@ class _AddTaskModalState extends State<AddTaskModal> {
                 ],
               ),
             ),
-          
-          // Form Content
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    // Task Name
-                    _buildInputField(
-                      label: 'Task Name',
-                      child: TextFormField(
-                        controller: _taskNameController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter task name',
-                          border: InputBorder.none,
+
+            // Form Content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Task Name
+                      _buildInputField(
+                        label: 'Task Name',
+                        child: TextFormField(
+                          controller: _taskNameController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter task name',
+                            border: InputBorder.none,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a task name';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a task name';
-                          }
-                          return null;
-                        },
                       ),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Due Date
-                    _buildInputField(
-                      label: 'Due Date',
-                      child: GestureDetector(
-                        onTap: _selectDate,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _selectedDate != null
-                                      ? _formatDate(_selectedDate!)
-                                      : 'Select due date',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: _selectedDate != null
-                                        ? Colors.black87
-                                        : Colors.grey,
+
+                      const SizedBox(height: 12),
+
+                      // Due Date
+                      _buildInputField(
+                        label: 'Due Date',
+                        child: GestureDetector(
+                          onTap: _selectDate,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _selectedDate != null
+                                        ? _formatDate(_selectedDate!)
+                                        : 'Select due date',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: _selectedDate != null
+                                          ? Colors.black87
+                                          : Colors.grey,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const Icon(
-                                Icons.calendar_today,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                            ],
+                                const Icon(
+                                  Icons.calendar_today,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Priority
-                    _buildInputField(
-                      label: 'Priority',
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          canvasColor: Colors.white,
-                          highlightColor: Colors.grey.withOpacity(0.1),
-                          splashColor: Colors.grey.withOpacity(0.1),
-                        ),
-                        child: DropdownButtonFormField<TaskPriority>(
-                          value: _selectedPriority,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Select priority',
-                            contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 0),
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
+
+                      const SizedBox(height: 12),
+
+                      // Priority
+                      _buildInputField(
+                        label: 'Priority',
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            canvasColor: Colors.white,
+                            highlightColor: Colors.grey.withValues(alpha: 0.1),
+                            splashColor: Colors.grey.withValues(alpha: 0.1),
+                          ),
+                          child: DropdownButtonFormField<TaskPriority>(
+                            initialValue: _selectedPriority,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Select priority',
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 0,
+                              ),
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: const TextStyle(
+                              color: Colors.black87,
                               fontSize: 16,
                             ),
-                          ),
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 16,
-                          ),
-                          dropdownColor: Colors.white,
-                          selectedItemBuilder: (BuildContext context) {
-                            return TaskPriority.values.map((priority) {
-                              return Text(
-                                priority.displayName,
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 16,
-                                ),
-                              );
-                            }).toList();
-                          },
-                          items: TaskPriority.values.map((priority) {
-                            return DropdownMenuItem(
-                              value: priority,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                child: Text(
+                            dropdownColor: Colors.white,
+                            selectedItemBuilder: (BuildContext context) {
+                              return TaskPriority.values.map((priority) {
+                                return Text(
                                   priority.displayName,
                                   style: const TextStyle(
                                     color: Colors.black87,
                                     fontSize: 16,
                                   ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedPriority = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Associated Contact
-                    _buildInputField(
-                      label: 'Associated Contact',
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          canvasColor: Colors.white,
-                          highlightColor: Colors.grey.withOpacity(0.1),
-                          splashColor: Colors.grey.withOpacity(0.1),
-                        ),
-                        child: DropdownButtonFormField<Contact>(
-                          value: _selectedContact,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Select contact',
-                            contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 0),
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
-                          ),
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 16,
-                          ),
-                          dropdownColor: Colors.white,
-                          selectedItemBuilder: (BuildContext context) {
-                            return widget.contacts.map((contact) {
-                              return Text(
-                                contact.name,
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 16,
+                                );
+                              }).toList();
+                            },
+                            items: TaskPriority.values.map((priority) {
+                              return DropdownMenuItem(
+                                value: priority,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    priority.displayName,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
                               );
-                            }).toList();
-                          },
-                          items: widget.contacts.map((contact) {
-                            return DropdownMenuItem(
-                              value: contact,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                child: Text(
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedPriority = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Associated Contact
+                      _buildInputField(
+                        label: 'Associated Contact',
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            canvasColor: Colors.white,
+                            highlightColor: Colors.grey.withValues(alpha: 0.1),
+                            splashColor: Colors.grey.withValues(alpha: 0.1),
+                          ),
+                          child: DropdownButtonFormField<Contact>(
+                            initialValue: _selectedContact,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Select contact',
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 0,
+                              ),
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 16,
+                            ),
+                            dropdownColor: Colors.white,
+                            selectedItemBuilder: (BuildContext context) {
+                              return widget.contacts.map((contact) {
+                                return Text(
                                   contact.name,
                                   style: const TextStyle(
                                     color: Colors.black87,
                                     fontSize: 16,
                                   ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedContact = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Associated Deal
-                    _buildInputField(
-                      label: 'Associated Deal',
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          canvasColor: Colors.white,
-                          highlightColor: Colors.grey.withOpacity(0.1),
-                          splashColor: Colors.grey.withOpacity(0.1),
-                        ),
-                        child: DropdownButtonFormField<Deal>(
-                          value: _selectedDeal,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Select deal',
-                            contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 0),
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
-                          ),
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 16,
-                          ),
-                          dropdownColor: Colors.white,
-                          selectedItemBuilder: (BuildContext context) {
-                            return widget.deals.map((deal) {
-                              return Text(
-                                deal.title,
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 16,
+                                );
+                              }).toList();
+                            },
+                            items: widget.contacts.map((contact) {
+                              return DropdownMenuItem(
+                                value: contact,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    contact.name,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
                               );
-                            }).toList();
-                          },
-                          items: widget.deals.map((deal) {
-                            return DropdownMenuItem(
-                              value: deal,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                child: Text(
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedContact = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Associated Deal
+                      _buildInputField(
+                        label: 'Associated Deal',
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            canvasColor: Colors.white,
+                            highlightColor: Colors.grey.withValues(alpha: 0.1),
+                            splashColor: Colors.grey.withValues(alpha: 0.1),
+                          ),
+                          child: DropdownButtonFormField<Deal>(
+                            initialValue: _selectedDeal,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Select deal',
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 0,
+                              ),
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 16,
+                            ),
+                            dropdownColor: Colors.white,
+                            selectedItemBuilder: (BuildContext context) {
+                              return widget.deals.map((deal) {
+                                return Text(
                                   deal.title,
                                   style: const TextStyle(
                                     color: Colors.black87,
                                     fontSize: 16,
                                   ),
+                                );
+                              }).toList();
+                            },
+                            items: widget.deals.map((deal) {
+                              return DropdownMenuItem(
+                                value: deal,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    deal.title,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedDeal = value;
-                            });
-                          },
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedDeal = value;
+                              });
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Create Task Button
-                    Container(
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0xFF007AFF),
-                            Color(0xFF0056CC),
+
+                      const SizedBox(height: 16),
+
+                      // Create Task Button
+                      Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [Color(0xFF007AFF), Color(0xFF0056CC)],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF007AFF,
+                              ).withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF007AFF).withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                        child: ElevatedButton(
+                          onPressed: _createTask,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: _createTask,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text(
-                          'Create Task',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          child: const Text(
+                            'Create Task',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
           ],
         ),
@@ -418,13 +432,10 @@ class _AddTaskModalState extends State<AddTaskModal> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -463,7 +474,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
               surface: Colors.white, // Calendar background
               onSurface: Colors.black87, // Calendar text
             ),
-            dialogBackgroundColor: Colors.white,
+            dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );
@@ -478,8 +489,18 @@ class _AddTaskModalState extends State<AddTaskModal> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }

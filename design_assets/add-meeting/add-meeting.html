@@ -1,0 +1,124 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+      :root {
+        --primary-color: #197fd2;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-white" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<header class="sticky top-0 z-10 bg-white border-b border-gray-200">
+<div class="flex items-center p-4">
+<button class="p-2 text-gray-600">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h1 class="flex-1 text-center text-lg font-bold text-gray-900 pr-10">New Meeting</h1>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-4 space-y-6">
+<div class="flex h-12 items-center justify-center rounded-xl bg-gray-100 p-1">
+<label class="flex h-full flex-1 cursor-pointer items-center justify-center rounded-lg px-3 text-sm font-semibold has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-[var(--primary-color)] text-gray-600">
+<span class="material-symbols-outlined mr-2">call</span>
+<span>Call</span>
+<input checked="" class="sr-only" name="meeting_type" type="radio" value="Call"/>
+</label>
+<label class="flex h-full flex-1 cursor-pointer items-center justify-center rounded-lg px-3 text-sm font-semibold has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-[var(--primary-color)] text-gray-600">
+<span class="material-symbols-outlined mr-2">videocam</span>
+<span>Video</span>
+<input class="sr-only" name="meeting_type" type="radio" value="Video"/>
+</label>
+<label class="flex h-full flex-1 cursor-pointer items-center justify-center rounded-lg px-3 text-sm font-semibold has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-[var(--primary-color)] text-gray-600">
+<span class="material-symbols-outlined mr-2">groups</span>
+<span>In-person</span>
+<input class="sr-only" name="meeting_type" type="radio" value="In-person"/>
+</label>
+</div>
+<input class="form-input w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="Meeting Title" value=""/>
+<div class="space-y-4">
+<h2 class="text-base font-bold text-gray-900">Date &amp; Time</h2>
+<div class="relative">
+<input class="form-input w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="Select Date" value=""/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">calendar_today</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<input class="form-input w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="Start Time" value=""/>
+<input class="form-input w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="End Time" value=""/>
+</div>
+<select class="form-select w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500">
+<option disabled="" selected="">Timezone</option>
+<option>PST</option>
+<option>EST</option>
+<option>GMT</option>
+</select>
+<input class="form-input w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="Duration" value=""/>
+<button class="flex w-full items-center justify-between rounded-lg p-4 text-left text-base text-gray-900 bg-gray-50 border border-gray-200">
+<span>Recurring</span>
+<span class="material-symbols-outlined text-gray-500">arrow_forward_ios</span>
+</button>
+</div>
+<div class="space-y-4">
+<h2 class="text-base font-bold text-gray-900">Location/Platform</h2>
+<input class="form-input w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500" placeholder="Enter Address or Meeting Link" value=""/>
+</div>
+<div class="space-y-4">
+<h2 class="text-base font-bold text-gray-900">Participants</h2>
+<div class="flex items-center space-x-2">
+<div class="flex -space-x-3 overflow-hidden">
+<div class="inline-block h-10 w-10 rounded-full border-2 border-white bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBTFbvlkUtfEX3pTAn6wcY6OJAy-D4zvEDZHI8exD3_Ktla8uokp1tWbnTqfEneSi_HtVvM9Z2tjPPiRNEQdYOreV7_tNiYZ_Ip69nZ6czZ0wqO3UK3kRCQ5DGE5aC4qG4jyjyN9QoheZ1bchOqSo97RS7_LdVN7Eon1EZiMIQHkjjwbHmmyi3zVUQe6Qel2MZ9XIKAqRQpUF4kl6biD6gWes-LELDBqlLXkbAzc0UkdLIMLraaDmDFWWCSqcbhpfg_N3Ik67I3noqx");'></div>
+<div class="inline-block h-10 w-10 rounded-full border-2 border-white bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAyPkdj0h9QOrUvuFo9fclkpxExtJoxgSroG9b99TMfzV1BhPA9j9W0tn65RoialGUCKIf9_WceWOomsgyCamxOacWZICFK2oxuxocYFPIz58apLuz2aQxaJjlxJsbP-0hMDPVrJAl-RuxxySTu7w9dri9daBKn9Idja94xwgjUKlPcz6bDS_oYBqhbjlrhXrU7xAMN8Vu_gKvMFgx1nwALIcibDxk0-aaNawBmg3xfwbREnvCx6EE69n4QNOJSMNDu3AoDF9Vc5TnN");'></div>
+<div class="inline-block h-10 w-10 rounded-full border-2 border-white bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAGCZLo0Y-Msn2QCXn0zOAbKW4o5pM01hXDngLd1lDBYZXvfbFW13AYJ16vpWN8I-zoGs77Gis1hYF7TaM-wiVejD1x1GJC6TawdNkIQMXhF8p5L09C4HNBlO9gVVa3SuzqRPKwObVhIO85XSrASHG2fkoWLLaypOCFdg6eLxGOseHb1L78ioYuZ4tjUDmk2NEfUTpigEE0nEeZqtTFQo19xaIdxH_iPoS8zCyAJFJmjlgDA949uXN1MExxvYvdAL96iLuit4BZ3vdD");'></div>
+</div>
+<button class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-100 text-gray-600">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<div class="space-y-4">
+<h2 class="text-base font-bold text-gray-900">Meeting Details</h2>
+<button class="flex w-full items-center justify-between rounded-lg p-4 text-left text-base text-gray-900 bg-gray-50 border border-gray-200">
+<span>Related Deal/Contact</span>
+<span class="material-symbols-outlined text-gray-500">arrow_forward_ios</span>
+</button>
+<textarea class="form-textarea w-full rounded-lg border-gray-200 bg-gray-50 p-4 text-base text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 min-h-[120px]" placeholder="Agenda"></textarea>
+<button class="flex w-full items-center justify-between rounded-lg p-4 text-left text-base text-gray-900 bg-gray-50 border border-gray-200">
+<span>Attachments</span>
+<span class="material-symbols-outlined text-gray-500">arrow_forward_ios</span>
+</button>
+<button class="flex w-full items-center justify-between rounded-lg p-4 text-left text-base text-gray-900 bg-gray-50 border border-gray-200">
+<span>Reminder</span>
+<span class="material-symbols-outlined text-gray-500">arrow_forward_ios</span>
+</button>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+<div class="flex justify-between gap-4">
+<button class="flex-1 rounded-xl h-12 px-6 text-sm font-bold text-gray-700 bg-gray-100">
+            Cancel
+          </button>
+<button class="flex-1 rounded-xl h-12 px-6 text-sm font-bold text-white bg-[var(--primary-color)]">
+            Schedule Meeting
+          </button>
+</div>
+</footer>
+</div>
+
+</body></html>

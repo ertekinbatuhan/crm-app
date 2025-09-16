@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CRM Contacts</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+    :root {
+      --primary-color: #197fd2;
+      --background-color: #F8F9FA;
+      --text-primary: #111827;
+      --text-secondary: #6B7280;
+      --border-color: #E5E7EB;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[var(--background-color)]">
+<div class="max-w-md mx-auto min-h-screen bg-white shadow-lg">
+<header class="sticky top-0 bg-white z-10">
+<div class="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
+<span class="material-symbols-outlined text-transparent"></span>
+<h1 class="text-xl font-bold text-[var(--text-primary)]">Contacts</h1>
+<button class="text-[var(--text-primary)]">
+<span class="material-symbols-outlined">
+            add
+          </span>
+</button>
+</div>
+<div class="px-4 pt-3 pb-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">search</span>
+<input class="w-full bg-[#f0f2f4] border-none rounded-lg h-10 pl-10 pr-4 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-color)] transition-shadow" placeholder="Search contacts" type="text"/>
+</div>
+</div>
+<div class="px-4 pb-3 flex space-x-2 overflow-x-auto">
+<button class="px-4 py-1.5 text-sm font-medium text-white bg-[var(--primary-color)] rounded-full">All</button>
+<button class="px-4 py-1.5 text-sm font-medium text-[var(--text-secondary)] bg-[#f0f2f4] rounded-full">Lead</button>
+<button class="px-4 py-1.5 text-sm font-medium text-[var(--text-secondary)] bg-[#f0f2f4] rounded-full">Customer</button>
+<button class="px-4 py-1.5 text-sm font-medium text-[var(--text-secondary)] bg-[#f0f2f4] rounded-full">Partner</button>
+</div>
+</header>
+<main class="pb-24">
+<div>
+<h2 class="px-4 py-2 text-base font-semibold text-[var(--text-secondary)] bg-[var(--background-color)]">A</h2>
+<div class="divide-y divide-[var(--border-color)]">
+<div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+<img alt="Ava Harper" class="h-12 w-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXmX-e5t8wVbcXOlCSYnuxKtpBXPFkIM27ldCwnXWXxYWAMlDN18HNVPGrXW7zDjDyWJvRuq5CJa_ODUCkCNvVv4gaDWHphOJb9ldmGMEVhg6xSuEAnVXQLmCec6Ofh53M4BwhPyz-8vOTSZuqJc4Iky9AQ5qr9QEY3fCg51Jtob2KLfjB9AW1KTX7FJjhwEudMZsr1oHdJpdRgxq4lOmsQ0rx2v7Tu1AqZAzfJJA243DHFqlZ70dKzXBgjcIna9CQXb3m10q1zgZ1"/>
+<div class="flex-1">
+<p class="text-base font-medium text-[var(--text-primary)]">Ava Harper</p>
+<p class="text-sm text-[var(--text-secondary)]">Lead</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+<img alt="Adam Bennett" class="h-12 w-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJR8uS0u8w43XQtyRWssas_mRRxDwITlDBKOSa5QgUp_TKm1ycwYFRA0BpdMV9-8Ufso-xHVOwgpUuwVe30WakK62ZnHqo40TUcIvPL5-3qR9lVgPHBQEjw1pbwx1Kn9j_jB-FvhvzZ8506ujJ5zMQKtBJPWS_Dgm9wGgkjatyh9pwPrGZSlb8o_NIhLhw7GZYjGnVwPIA9trq1SLAuMT5DRvzf0W6ODLbD4u7QQ5vn5EWyxp_qwV72BKhx6E7F9QIpMBokBETkit1"/>
+<div class="flex-1">
+<p class="text-base font-medium text-[var(--text-primary)]">Adam Bennett</p>
+<p class="text-sm text-[var(--text-secondary)]">Customer</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h2 class="px-4 py-2 text-base font-semibold text-[var(--text-secondary)] bg-[var(--background-color)]">B</h2>
+<div class="divide-y divide-[var(--border-color)]">
+<div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+<img alt="Blake Carter" class="h-12 w-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA57xmYw7iSZ-AcsrYzVQjmpirgkTZ47wFtv6w26hXMYz9rgBLAl4vEXGAUjVb2h38q2ujTnr6_c914Ty-T3ATwa2hCASYB0O8guWtjF-vVtJi0wMJ0xJ75lp24W-Nwsg3OWivo_M99YVEluGUyej_r3Snx0AXqJt-f8w28TFWxGw_e5NiquKOkowji9m2Edemkyftzr3szHL52B_bbuCInAu5BKOEDycp_debB-8cup9ryCVk350dngFtPSNTD0vtItqlW6AjJ_DxD"/>
+<div class="flex-1">
+<p class="text-base font-medium text-[var(--text-primary)]">Blake Carter</p>
+<p class="text-sm text-[var(--text-secondary)]">Lead</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+<div class="h-12 w-12 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-bold text-lg">
+<span>BD</span>
+</div>
+<div class="flex-1">
+<p class="text-base font-medium text-[var(--text-primary)]">Bella Davis</p>
+<p class="text-sm text-[var(--text-secondary)]">Partner</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h2 class="px-4 py-2 text-base font-semibold text-[var(--text-secondary)] bg-[var(--background-color)]">C</h2>
+<div class="divide-y divide-[var(--border-color)]">
+<div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+<img alt="Chloe Evans" class="h-12 w-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqAFnu4ua9G3Cu0G9VaA7iB6PsG0YjOKrwAjPD5MZTYxDsdXThpb30U1qymXNTflDGVS0xoFzyzz9M3M9pYSX0lq7xziim3r4ckRa3_-P2a29YBEIh3MbWLhijXJEVcj9jUU8-EnQp3o1b41kl5rufH1MxnHZjhIeAlLFRGyGLKWmr0LD7Nfyxx0nK8hAK9IxLVNnLbyrPOHtwQ9-ekxczGMvzZtoU6DvajHuTUPagSz5avUgOFMB_v2sxZ2oUIDLKzHdE204GU649"/>
+<div class="flex-1">
+<p class="text-base font-medium text-[var(--text-primary)]">Chloe Evans</p>
+<p class="text-sm text-[var(--text-secondary)]">Customer</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-6 right-6">
+<button class="w-14 h-14 bg-[var(--primary-color)] rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-700 transition-colors">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</div>
+
+</body></html>

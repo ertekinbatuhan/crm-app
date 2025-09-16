@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -25,14 +26,16 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: backgroundColor ?? Colors.white,
+      backgroundColor:
+          backgroundColor ?? Theme.of(context).appBarTheme.backgroundColor,
       elevation: elevation ?? 0,
       automaticallyImplyLeading: automaticallyImplyLeading,
       leading: leading,
       title: Text(
         title,
         style: TextStyle(
-          color: titleColor ?? Colors.black,
+          color:
+              titleColor ?? Theme.of(context).appBarTheme.titleTextStyle?.color,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -40,7 +43,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: actions,
       bottom: bottom,
       iconTheme: IconThemeData(
-        color: titleColor ?? Colors.black,
+        color: titleColor ?? Theme.of(context).appBarTheme.iconTheme?.color,
       ),
     );
   }
@@ -72,9 +75,13 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             color: titleColor ?? Colors.black,
             size: 24,
           ),
-          onPressed: onSettingsPressed ?? () {
-            print('Settings pressed');
-          },
+          onPressed:
+              onSettingsPressed ??
+              () {
+                if (kDebugMode) {
+                  print('Settings pressed');
+                }
+              },
         ),
       ],
     );

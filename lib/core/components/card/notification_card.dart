@@ -15,7 +15,7 @@ class NotificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 2,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -34,9 +34,9 @@ class NotificationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...notifications
-              .map((notification) => _buildNotificationItem(notification))
-              .toList(),
+          ...notifications.map(
+            (notification) => _buildNotificationItem(notification),
+          ),
         ],
       ),
     );

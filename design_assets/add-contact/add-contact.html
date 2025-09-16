@@ -1,0 +1,163 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50">
+<div class="relative flex h-auto min-h-screen w-full flex-col justify-between group/design-root" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="flex-grow">
+<div class="flex items-center justify-between border-b border-gray-200 bg-white p-4">
+<button class="text-gray-600 hover:text-gray-900">
+<svg fill="currentColor" height="24px" viewBox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
+</svg>
+</button>
+<h2 class="text-lg font-semibold text-gray-900">New Contact</h2>
+<button class="rounded-lg bg-[#197fd2] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Save
+          </button>
+</div>
+<div class="space-y-6 p-4">
+<div>
+<h3 class="mb-4 text-base font-semibold text-gray-500">Basic Information</h3>
+<div class="space-y-4">
+<div class="flex items-center space-x-4">
+<div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+<span class="material-symbols-outlined text-gray-400" style="font-size: 32px;">
+                    add_a_photo
+                  </span>
+</div>
+<button class="text-sm font-medium text-[#197fd2] hover:text-blue-700">Upload Profile Photo</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="first-name">First Name <span class="text-red-500">*</span></label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="first-name" type="text"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="last-name">Last Name <span class="text-red-500">*</span></label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="last-name" type="text"/>
+</div>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="job-title">Job Title</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="job-title" type="text"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="company">Company</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="company" type="text"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="contact-type">Contact Type</label>
+<select class="form-select w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="contact-type">
+<option>Select...</option>
+<option>Lead</option>
+<option>Customer</option>
+<option>Partner</option>
+</select>
+</div>
+</div>
+</div>
+<div>
+<h3 class="mb-4 text-base font-semibold text-gray-500">Contact Details</h3>
+<div class="space-y-4">
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="email">Email</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="email" type="email"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="phone">Phone Number</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="phone" type="tel"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="website">Website</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="website" type="url"/>
+</div>
+</div>
+</div>
+<div>
+<h3 class="mb-4 text-base font-semibold text-gray-500">Address</h3>
+<div class="space-y-4">
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="street">Street</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="street" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="city">City</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="city" type="text"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="state">State</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="state" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="zip">Zip Code</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="zip" type="text"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="country">Country</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="country" type="text"/>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="mb-4 text-base font-semibold text-gray-500">Additional Info</h3>
+<div class="space-y-4">
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="tags">Tags</label>
+<input class="form-input w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="tags" placeholder="Add tags..." type="text"/>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="lead-source">Lead Source</label>
+<select class="form-select w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="lead-source">
+<option>Select...</option>
+<option>Website</option>
+<option>Referral</option>
+<option>Advertisement</option>
+</select>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="assigned-to">Assigned To</label>
+<select class="form-select w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="assigned-to">
+<option>Select user...</option>
+<option>John Doe</option>
+<option>Jane Smith</option>
+</select>
+</div>
+<div>
+<label class="mb-1 block text-sm font-medium text-gray-700" for="notes">Notes</label>
+<textarea class="form-textarea w-full rounded-lg border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500" id="notes" rows="4"></textarea>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sticky bottom-0 border-t border-gray-200 bg-white/80 p-4 backdrop-blur-sm">
+<div class="flex items-center justify-between">
+<button class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-300">
+            Cancel
+          </button>
+<button class="text-sm font-semibold text-[#197fd2] hover:text-blue-700">
+            Save &amp; New
+          </button>
+<button class="rounded-lg bg-[#197fd2] px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Save
+          </button>
+</div>
+</div>
+</div>
+
+</body></html>

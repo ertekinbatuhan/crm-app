@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/contact_model.dart';
 import '../viewmodels/contacts_viewmodel.dart';
-import '../../../models/contact_model.dart';
+import '../core/components/layout/page_container.dart';
+import '../core/components/layout/empty_state.dart';
+import '../core/components/cards/contact_card.dart';
+import '../core/components/cards/stat_card.dart';
+import '../core/theme/app_spacing.dart';
+import 'contact_detail_view.dart';
+import 'modals/add_contact_modal.dart';
 
 class ContactsView extends StatefulWidget {
   const ContactsView({super.key});
@@ -23,245 +30,179 @@ class _ContactsViewState extends State<ContactsView> {
   Widget build(BuildContext context) {
     return Consumer<ContactsViewModel>(
       builder: (context, viewModel, child) {
-        if (viewModel.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (viewModel.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Error: ${viewModel.errorMessage}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => viewModel.loadContacts(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF34C759).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.people,
-                      color: Color(0xFF34C759),
-                      size: 20,
+        return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _showAddContactModal(viewModel),
+          child: const Icon(Icons.add),
+        ),
+          body: PageContainer(
+            scrollable: false,
+            child: CustomScrollView(
+            slivers: [
+              // Search Bar
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: AppSpacing.screenPadding,
+                  child: TextField(
+                    onChanged: viewModel.updateSearchQuery,
+                    decoration: InputDecoration(
+                      hintText: 'Search contacts...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(28),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      contentPadding: AppSpacing.inputPadding,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Contacts',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Spacer(),
-                  FloatingActionButton(
-                    onPressed: () => _showAddContactDialog(viewModel),
-                    backgroundColor: const Color(0xFF34C759),
-                    mini: true,
-                    child: const Icon(Icons.add, color: Colors.white, size: 20),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Search
-              TextField(
-                onChanged: viewModel.updateSearchQuery,
-                decoration: InputDecoration(
-                  hintText: 'Search contacts...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
                 ),
               ),
-
-              const SizedBox(height: 24),
-
-              // Stats
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 5,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Total Contacts',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            viewModel.totalContacts.toString(),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              
+              // Stats Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: AppSpacing.screenPadding,
+                  child: StatCard.contacts(
+                    value: viewModel.totalContacts.toString(),
+                    onTap: () => print('Contacts stat tapped'),
                   ),
-                ],
+                ),
               ),
-
-              const SizedBox(height: 24),
-
+              
+              // Spacing
+              SliverToBoxAdapter(
+                child: AppSpacing.gapV4,
+              ),
+              
+              // Loading State
+              if (viewModel.isLoading)
+                const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              
+              // Error State
+              if (viewModel.hasError && !viewModel.isLoading)
+                SliverFillRemaining(
+                  child: EmptyState.error(
+                    message: viewModel.errorMessage ?? 'Failed to load contacts',
+                    onRetry: viewModel.loadContacts,
+                  ),
+                ),
+              
+              // Empty State
+              if (viewModel.contacts.isEmpty && !viewModel.isLoading && !viewModel.hasError)
+                const SliverFillRemaining(
+                  child: EmptyState(
+                    iconData: Icons.people_outline,
+                    title: 'No contacts yet',
+                    message: 'Add your first contact to get started',
+                  ),
+                ),
+              
               // Contacts List
-              if (viewModel.contacts.isEmpty)
-                const Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        'No contacts found',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    ],
+              if (viewModel.contacts.isNotEmpty && !viewModel.isLoading && !viewModel.hasError)
+                SliverPadding(
+                  padding: AppSpacing.screenPadding,
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final contact = viewModel.contacts[index];
+                        return ContactCard.fromModel(
+                          id: contact.id,
+                          name: contact.name,
+                          email: contact.email,
+                          phone: contact.phone,
+                          company: contact.company,
+                          onTap: () => _navigateToContactDetail(contact),
+                          onCall: () => _makeCall(contact.phone),
+                          onEmail: () => _sendEmail(contact.email),
+                          onEdit: () => _showEditContactModal(viewModel, contact),
+                          onDelete: () => _showDeleteConfirmation(viewModel, contact),
+                        );
+                      },
+                      childCount: viewModel.contacts.length,
+                    ),
                   ),
-                )
-              else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: viewModel.contacts.length,
-                  itemBuilder: (context, index) {
-                    final contact = viewModel.contacts[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFF34C759),
-                          child: Text(
-                            contact.name.isNotEmpty
-                                ? contact.name[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          contact.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (contact.email != null) Text(contact.email!),
-                            if (contact.phone != null) Text(contact.phone!),
-                            if (contact.company != null) Text(contact.company!),
-                          ],
-                        ),
-                        trailing: PopupMenuButton(
-                          onSelected: (value) {
-                            if (value == 'delete') {
-                              viewModel.deleteContact(contact.id);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Text('Delete'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
                 ),
             ],
+            ),
           ),
         );
       },
     );
   }
 
-  void _showAddContactDialog(ContactsViewModel viewModel) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final phoneController = TextEditingController();
-    final companyController = TextEditingController();
+  void _showAddContactModal(ContactsViewModel viewModel) async {
+    final result = await Navigator.push<Contact>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddContactModal(
+          onSave: (contact) {
+            viewModel.createContact(contact);
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+    
+    if (result != null) {
+      // Contact was saved successfully
+    }
+  }
 
+  // Navigation and action methods
+  void _navigateToContactDetail(Contact contact) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ContactDetailView(contact: contact),
+      ),
+    );
+  }
+
+  void _makeCall(String? phone) {
+    if (phone != null) {
+      print('Making call to: $phone');
+      // TODO: Implement phone call functionality
+    }
+  }
+
+  void _sendEmail(String? email) {
+    if (email != null) {
+      print('Sending email to: $email');
+      // TODO: Implement email functionality
+    }
+  }
+
+  void _showEditContactModal(ContactsViewModel viewModel, Contact contact) async {
+    final result = await Navigator.push<Contact>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddContactModal(
+          contact: contact,
+          onSave: (updatedContact) {
+            // TODO: viewModel.updateContact(updatedContact);
+            print('Update contact: ${updatedContact.name}');
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+    
+    if (result != null) {
+      // Contact was updated successfully
+    }
+  }
+
+  void _showDeleteConfirmation(ContactsViewModel viewModel, Contact contact) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Contact'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name *',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(
-                labelText: 'Phone',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: companyController,
-              decoration: const InputDecoration(
-                labelText: 'Company',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Delete Contact'),
+        content: Text('Are you sure you want to delete ${contact.name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -269,25 +210,14 @@ class _ContactsViewState extends State<ContactsView> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                final contact = Contact(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  name: nameController.text,
-                  email: emailController.text.isEmpty
-                      ? null
-                      : emailController.text,
-                  phone: phoneController.text.isEmpty
-                      ? null
-                      : phoneController.text,
-                  company: companyController.text.isEmpty
-                      ? null
-                      : companyController.text,
-                );
-                viewModel.createContact(contact);
-                Navigator.pop(context);
-              }
+              viewModel.deleteContact(contact.id);
+              Navigator.pop(context);
             },
-            child: const Text('Add'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
           ),
         ],
       ),

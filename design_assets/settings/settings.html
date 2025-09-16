@@ -1,0 +1,123 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+      :root {
+        --primary-color: #197fd2;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50">
+<div class="relative flex h-auto min-h-screen w-full flex-col justify-between group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="flex-grow">
+<header class="bg-white sticky top-0 z-10 shadow-sm">
+<div class="flex items-center p-4">
+<button class="text-gray-600 hover:text-gray-900">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-gray-900 text-xl font-bold flex-1 text-center pr-8">Settings</h1>
+</div>
+</header>
+<main class="p-4">
+<h2 class="text-gray-800 text-lg font-semibold mb-4 px-2">App Settings</h2>
+<div class="bg-white rounded-lg shadow-sm">
+<ul class="divide-y divide-gray-200">
+<li class="p-4 flex items-center gap-4 hover:bg-gray-50 cursor-pointer">
+<div class="flex items-center justify-center rounded-full bg-gray-100 shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-600">person</span>
+</div>
+<div class="flex-grow">
+<p class="text-gray-900 font-medium">Account Settings</p>
+<p class="text-gray-500 text-sm">Manage your profile, email, and security</p>
+</div>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</li>
+<li class="p-4 flex items-center gap-4 hover:bg-gray-50">
+<div class="flex items-center justify-center rounded-full bg-gray-100 shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-600">notifications</span>
+</div>
+<div class="flex-grow">
+<p class="text-gray-900 font-medium">Notifications</p>
+<p class="text-gray-500 text-sm">Customize how you receive updates</p>
+</div>
+<label class="relative flex h-7 w-12 cursor-pointer items-center rounded-full bg-gray-200 has-[:checked]:bg-[var(--primary-color)] transition-colors">
+<span class="absolute left-1 h-5 w-5 rounded-full bg-white transition-transform transform has-[:checked]:translate-x-full"></span>
+<input class="sr-only" type="checkbox"/>
+</label>
+</li>
+<li class="p-4 flex items-center gap-4 hover:bg-gray-50 cursor-pointer">
+<div class="flex items-center justify-center rounded-full bg-gray-100 shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-600">contrast</span>
+</div>
+<div class="flex-grow">
+<p class="text-gray-900 font-medium">Display</p>
+<p class="text-gray-500 text-sm">Adjust the app's appearance and theme</p>
+</div>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</li>
+<li class="p-4 flex items-center gap-4 hover:bg-gray-50 cursor-pointer">
+<div class="flex items-center justify-center rounded-full bg-gray-100 shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-600">calendar_today</span>
+</div>
+<div class="flex-grow">
+<p class="text-gray-900 font-medium">Calendar &amp; Tasks</p>
+<p class="text-gray-500 text-sm">Configure sync and task reminders</p>
+</div>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</li>
+<li class="p-4 flex items-center gap-4 hover:bg-gray-50 cursor-pointer">
+<div class="flex items-center justify-center rounded-full bg-gray-100 shrink-0 size-10">
+<span class="material-symbols-outlined text-gray-600">privacy_tip</span>
+</div>
+<div class="flex-grow">
+<p class="text-gray-900 font-medium">Data &amp; Privacy</p>
+<p class="text-gray-500 text-sm">Manage data, backups, and privacy</p>
+</div>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</li>
+</ul>
+</div>
+<div class="mt-6 flex justify-end">
+<button class="bg-[var(--primary-color)] text-white font-semibold py-2 px-6 rounded-lg shadow-sm hover:bg-opacity-90 transition-colors">
+              Save Changes
+            </button>
+</div>
+</main>
+</div>
+<footer class="bg-white border-t border-gray-200 sticky bottom-0 z-10">
+<nav class="flex justify-around p-2">
+<a class="flex flex-col items-center justify-center gap-1 text-[var(--primary-color)]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs font-medium">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-900" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-xs font-medium">Contacts</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-900" href="#">
+<span class="material-symbols-outlined">work</span>
+<span class="text-xs font-medium">Deals</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-900" href="#">
+<span class="material-symbols-outlined">task_alt</span>
+<span class="text-xs font-medium">Tasks</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-900" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-xs font-medium">Reports</span>
+</a>
+</nav>
+</footer>
+</div>
+
+</body></html>

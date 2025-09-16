@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/deal_model.dart';
 import '../viewmodels/deals_viewmodel.dart';
-import '../../../models/deal_model.dart';
+import '../core/components/layout/page_container.dart';
+import '../core/components/layout/empty_state.dart';
+import '../core/components/cards/deal_card.dart' as card_deal;
+import '../core/components/cards/stat_card.dart';
+import '../core/theme/app_spacing.dart';
+import 'deal_detail_view.dart';
+import 'modals/add_deal_modal.dart';
 
 class DealsView extends StatefulWidget {
   const DealsView({super.key});
@@ -23,277 +30,217 @@ class _DealsViewState extends State<DealsView> {
   Widget build(BuildContext context) {
     return Consumer<DealsViewModel>(
       builder: (context, viewModel, child) {
-        if (viewModel.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (viewModel.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Error: ${viewModel.errorMessage}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => viewModel.loadDeals(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF9500).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.handshake,
-                      color: Color(0xFFFF9500),
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Deals',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Spacer(),
-                  FloatingActionButton(
-                    onPressed: () => _showAddDealDialog(viewModel),
-                    backgroundColor: const Color(0xFFFF9500),
-                    mini: true,
-                    child: const Icon(Icons.add, color: Colors.white, size: 20),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Search
-              TextField(
-                onChanged: viewModel.updateSearchQuery,
-                decoration: InputDecoration(
-                  hintText: 'Search deals...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Stats
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      'Total Deals',
-                      viewModel.totalDeals.toString(),
-                      Icons.handshake,
-                      const Color(0xFFFF9500),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      'Total Value',
-                      '\$${viewModel.totalValue.toStringAsFixed(0)}',
-                      Icons.attach_money,
-                      const Color(0xFF34C759),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Deals List
-              if (viewModel.deals.isEmpty)
-                const Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.handshake_outlined,
-                        size: 64,
-                        color: Colors.grey,
+        return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _showAddDealModal(viewModel),
+          child: const Icon(Icons.add),
+        ),
+          body: PageContainer(
+            scrollable: false,
+            child: CustomScrollView(
+              slivers: [
+                // Search Bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: AppSpacing.screenPadding,
+                    child: TextField(
+                      onChanged: viewModel.updateSearchQuery,
+                      decoration: InputDecoration(
+                        hintText: 'Search deals...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(28),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        contentPadding: AppSpacing.inputPadding,
                       ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No deals found',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    ],
+                    ),
                   ),
-                )
-              else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: viewModel.deals.length,
-                  itemBuilder: (context, index) {
-                    final deal = viewModel.deals[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: _getStatusColor(deal.status),
-                          child: const Icon(
-                            Icons.handshake,
-                            color: Colors.white,
+                ),
+                
+                // Stats Section
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: AppSpacing.screenPadding,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: StatCard.deals(
+                            value: viewModel.totalDeals.toString(),
+                            onTap: () => print('Deals stat tapped'),
                           ),
                         ),
-                        title: Text(
-                          deal.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        AppSpacing.gapH3,
+                        Expanded(
+                          child: StatCard.revenue(
+                            value: '\$${_formatLargeNumber(viewModel.totalValue)}',
+                            onTap: () => print('Revenue stat tapped'),
+                          ),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('\$${deal.value.toStringAsFixed(2)}'),
-                            Text(deal.status.displayName),
-                            if (deal.description != null)
-                              Text(deal.description!),
-                          ],
-                        ),
-                        trailing: PopupMenuButton(
-                          onSelected: (value) {
-                            if (value == 'delete') {
-                              viewModel.deleteDeal(deal.id);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Text('Delete'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                  ),
                 ),
-            ],
+                
+                // Spacing
+                SliverToBoxAdapter(
+                  child: AppSpacing.gapV4,
+                ),
+                
+                // Loading State
+                if (viewModel.isLoading)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                
+                // Error State
+                if (viewModel.hasError && !viewModel.isLoading)
+                  SliverFillRemaining(
+                    child: EmptyState.error(
+                      message: viewModel.errorMessage ?? 'Failed to load deals',
+                      onRetry: viewModel.loadDeals,
+                    ),
+                  ),
+                
+                // Empty State
+                if (viewModel.deals.isEmpty && !viewModel.isLoading && !viewModel.hasError)
+                  const SliverFillRemaining(
+                    child: EmptyState(
+                      iconData: Icons.handshake_outlined,
+                      title: 'No deals yet',
+                      message: 'Create your first deal to get started',
+                    ),
+                  ),
+                
+                // Deals List
+                if (viewModel.deals.isNotEmpty && !viewModel.isLoading && !viewModel.hasError)
+                  SliverPadding(
+                    padding: AppSpacing.screenPadding,
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final deal = viewModel.deals[index];
+                          return card_deal.DealCard.fromModel(
+                            id: deal.id,
+                            title: deal.title,
+                            value: deal.value,
+                            description: deal.description,
+                            status: _mapDealStatus(deal.status),
+                            closeDate: deal.closeDate,
+                            onTap: () => _navigateToDealDetail(deal),
+                          onEdit: () => _showEditDealModal(viewModel, deal),
+                            onStatusChange: () => _showStatusChangeDialog(viewModel, deal),
+                            onDelete: () => _showDeleteConfirmation(viewModel, deal),
+                          );
+                        },
+                        childCount: viewModel.deals.length,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-        ],
+  // Utility methods for new architecture
+  String _formatLargeNumber(double value) {
+    if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(1)}K';
+    } else {
+      return value.toStringAsFixed(0);
+    }
+  }
+
+  card_deal.DealStatus _mapDealStatus(DealStatus status) {
+    switch (status) {
+      case DealStatus.prospect:
+        return card_deal.DealStatus.prospect;
+      case DealStatus.qualified:
+        return card_deal.DealStatus.qualified;
+      case DealStatus.proposal:
+        return card_deal.DealStatus.proposal;
+      case DealStatus.negotiation:
+        return card_deal.DealStatus.negotiation;
+      case DealStatus.closed:
+        return card_deal.DealStatus.closed;
+      case DealStatus.lost:
+        return card_deal.DealStatus.lost;
+    }
+  }
+
+  // Navigation and action methods
+  void _navigateToDealDetail(Deal deal) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DealDetailView(deal: deal),
       ),
     );
   }
 
-  Color _getStatusColor(DealStatus status) {
-    switch (status) {
-      case DealStatus.prospect:
-        return Colors.blue;
-      case DealStatus.qualified:
-        return Colors.orange;
-      case DealStatus.proposal:
-        return Colors.purple;
-      case DealStatus.negotiation:
-        return Colors.amber;
-      case DealStatus.closed:
-        return Colors.green;
-      case DealStatus.lost:
-        return Colors.red;
+  void _showEditDealModal(DealsViewModel viewModel, Deal deal) async {
+    final result = await Navigator.push<Deal>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddDealModal(
+          deal: deal,
+          onSave: (updatedDeal) {
+            // TODO: viewModel.updateDeal(updatedDeal);
+            print('Update deal: ${updatedDeal.title}');
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+    
+    if (result != null) {
+      // Deal was updated successfully
     }
   }
 
-  void _showAddDealDialog(DealsViewModel viewModel) {
-    final titleController = TextEditingController();
-    final valueController = TextEditingController();
-    final descriptionController = TextEditingController();
-    DealStatus selectedStatus = DealStatus.prospect;
+  void _showAddDealModal(DealsViewModel viewModel) async {
+    final result = await Navigator.push<Deal>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddDealModal(
+          onSave: (deal) {
+            viewModel.createDeal(deal);
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+    
+    if (result != null) {
+      // Deal was saved successfully
+    }
+  }
+
+  void _showStatusChangeDialog(DealsViewModel viewModel, Deal deal) {
+    DealStatus selectedStatus = deal.status;
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Add New Deal'),
+          title: const Text('Change Deal Status'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title *',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: valueController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Value *',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+              Text('Deal: ${deal.title}'),
               const SizedBox(height: 16),
               DropdownButtonFormField<DealStatus>(
                 value: selectedStatus,
                 decoration: const InputDecoration(
-                  labelText: 'Status',
+                  labelText: 'New Status',
                   border: OutlineInputBorder(),
                 ),
                 items: DealStatus.values.map((status) {
@@ -310,15 +257,6 @@ class _DealsViewState extends State<DealsView> {
                   }
                 },
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
             ],
           ),
           actions: [
@@ -328,25 +266,41 @@ class _DealsViewState extends State<DealsView> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (titleController.text.isNotEmpty &&
-                    valueController.text.isNotEmpty) {
-                  final deal = Deal(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    title: titleController.text,
-                    value: double.tryParse(valueController.text) ?? 0.0,
-                    status: selectedStatus,
-                    description: descriptionController.text.isEmpty
-                        ? null
-                        : descriptionController.text,
-                  );
-                  viewModel.createDeal(deal);
-                  Navigator.pop(context);
-                }
+                // TODO: Implement status change functionality
+                print('Change status for ${deal.title} to ${selectedStatus.displayName}');
+                Navigator.pop(context);
               },
-              child: const Text('Add'),
+              child: const Text('Update'),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(DealsViewModel viewModel, Deal deal) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Deal'),
+        content: Text('Are you sure you want to delete "${deal.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              viewModel.deleteDeal(deal.id);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
