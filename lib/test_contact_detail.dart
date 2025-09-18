@@ -4,6 +4,7 @@ import 'models/contact_model.dart';
 import 'views/contact_detail_view.dart';
 import 'core/theme/app_theme.dart';
 import 'viewmodels/contacts_viewmodel.dart';
+import 'services/contact_service.dart';
 
 void main() {
   runApp(const TestContactDetailApp());
@@ -16,7 +17,10 @@ class TestContactDetailApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ContactsViewModel()),
+        ChangeNotifierProvider(
+          create: (_) =>
+              ContactsViewModel(contactService: ContactServiceImpl()),
+        ),
       ],
       child: MaterialApp(
         title: 'Contact Detail Test',

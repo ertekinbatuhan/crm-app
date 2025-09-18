@@ -31,7 +31,7 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Color? changeColor;
     IconData? changeIcon;
-    
+
     if (change != null && isPositive != null) {
       changeColor = isPositive! ? AppColors.success : AppColors.error;
       changeIcon = isPositive! ? Icons.arrow_upward : Icons.arrow_downward;
@@ -40,59 +40,76 @@ class StatCard extends StatelessWidget {
     return BaseCard.clickable(
       onTap: onTap ?? () {},
       backgroundColor: backgroundColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Adjust font size based on available height
+          final availableHeight = constraints.maxHeight;
+          final isCompact = availableHeight < 120; // Threshold for compact mode
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTypography.statLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (icon != null)
-                Icon(
-                  icon,
-                  size: AppSpacing.iconSizeS,
-                  color: iconColor ?? AppColors.textSecondary,
-                ),
-            ],
-          ),
-          AppSpacing.gapV2,
-          Text(
-            value,
-            style: AppTypography.statValue,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (change != null) ...[
-            AppSpacing.gapV1,
-            Row(
-              children: [
-                if (changeIcon != null) ...[
-                  Icon(
-                    changeIcon,
-                    size: 16,
-                    color: changeColor,
+              // Title row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTypography.statLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  AppSpacing.gapH1,
+                  if (icon != null)
+                    Icon(
+                      icon,
+                      size: AppSpacing.iconSizeS,
+                      color: iconColor ?? AppColors.textSecondary,
+                    ),
                 ],
-                Text(
-                  change!,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: changeColor ?? AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+
+              // Value - responsive sizing
+              Text(
+                value,
+                style: isCompact
+                    ? AppTypography.headlineMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.5,
+                      )
+                    : AppTypography.statValue,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              // Change indicator - only show if space allows
+              if (change != null && !isCompact) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (changeIcon != null) ...[
+                      Icon(changeIcon, size: 14, color: changeColor),
+                      AppSpacing.gapH1,
+                    ],
+                    Flexible(
+                      child: Text(
+                        change!,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: changeColor ?? AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        ],
+            ],
+          );
+        },
       ),
     );
   }

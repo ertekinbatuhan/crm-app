@@ -32,7 +32,7 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   Widget build(BuildContext context) {
     final titles = ['Dashboard', 'Contacts', 'Deals', 'Tasks', 'Reports'];
-    
+
     return AppScaffold(
       title: titles[_currentIndex],
       body: _pages[_currentIndex],
@@ -63,7 +63,7 @@ class _DashboardContent extends StatelessWidget {
             // Stats Section
             _buildStatsGrid(),
             AppSpacing.gapV6,
-            
+
             // Pipeline Section
             PipelineCard.sales(
               stages: _getMockPipelineStages(),
@@ -73,7 +73,7 @@ class _DashboardContent extends StatelessWidget {
               },
             ),
             AppSpacing.gapV6,
-            
+
             // Activity Section
             ActivityCard.recent(
               activities: _getMockActivities(),
@@ -93,7 +93,7 @@ class _DashboardContent extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      childAspectRatio: 1.5,
+      childAspectRatio: 1.8, // Increased from 1.5 to provide more height
       crossAxisSpacing: AppSpacing.sp4,
       mainAxisSpacing: AppSpacing.sp4,
       children: [

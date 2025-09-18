@@ -4,6 +4,7 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 
 enum ButtonVariant { primary, secondary, text, outlined }
+
 enum ButtonSize { small, medium, large }
 
 /// A reusable button component with multiple variants and sizes
@@ -44,7 +45,7 @@ class BaseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDisabled = onPressed == null || isLoading;
-    
+
     // Get size properties
     final buttonHeight = _getButtonHeight();
     final iconSize = _getIconSize();
@@ -63,25 +64,64 @@ class BaseButton extends StatelessWidget {
               ),
             ),
           )
-        : child ?? Row(
-            mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (leadingIcon != null) ...[
-                Icon(leadingIcon, size: iconSize),
-                AppSpacing.gapH2,
-              ],
-              Text(
-                text,
-                style: textStyle,
-                textAlign: TextAlign.center,
-              ),
-              if (trailingIcon != null) ...[
-                AppSpacing.gapH2,
-                Icon(trailingIcon, size: iconSize),
-              ],
-            ],
-          );
+        : child ??
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final availableWidth = constraints.maxWidth;
+                  final hasConstraints =
+                      availableWidth > 0 && availableWidth.isFinite;
+
+                  // Calculate minimum required width for icon + text + gaps
+                  final iconWidth =
+                      (leadingIcon != null ? iconSize : 0) +
+                      (trailingIcon != null ? iconSize : 0);
+                  final gapWidth =
+                      ((leadingIcon != null ? 1 : 0) +
+                          (trailingIcon != null ? 1 : 0)) *
+                      8.0; // AppSpacing.sp2
+
+                  // Estimate text width (rough approximation)
+                  final textWidth = text.length * 8.0; // Rough estimation
+                  final minRequiredWidth = iconWidth + gapWidth + textWidth;
+
+                  // If constrained and content won't fit, make it adaptive
+                  final isVeryConstrained =
+                      hasConstraints &&
+                      availableWidth < minRequiredWidth &&
+                      leadingIcon != null;
+
+                  if (isVeryConstrained) {
+                    // Show only icon when severely constrained
+                    return Icon(leadingIcon!, size: iconSize);
+                  }
+
+                  return Row(
+                    mainAxisSize: isFullWidth
+                        ? MainAxisSize.max
+                        : MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (leadingIcon != null) ...[
+                        Icon(leadingIcon, size: iconSize),
+                        AppSpacing.gapH2,
+                      ],
+                      Flexible(
+                        child: Text(
+                          text,
+                          style: textStyle,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (trailingIcon != null) ...[
+                        AppSpacing.gapH2,
+                        Icon(trailingIcon, size: iconSize),
+                      ],
+                    ],
+                  );
+                },
+              );
 
     // Build button based on variant
     Widget button;
@@ -133,8 +173,8 @@ class BaseButton extends StatelessWidget {
             foregroundColor: foregroundColor ?? AppColors.primary700,
             disabledForegroundColor: AppColors.textTertiary,
             side: BorderSide(
-              color: isDisabled 
-                  ? AppColors.borderLight 
+              color: isDisabled
+                  ? AppColors.borderLight
                   : (backgroundColor ?? AppColors.primary700),
               width: 1.5,
             ),
@@ -168,10 +208,7 @@ class BaseButton extends StatelessWidget {
     }
 
     return isFullWidth
-        ? SizedBox(
-            width: double.infinity,
-            child: button,
-          )
+        ? SizedBox(width: double.infinity, child: button)
         : button;
   }
 
@@ -211,17 +248,23 @@ class BaseButton extends StatelessWidget {
   EdgeInsetsGeometry _getPadding() {
     switch (size) {
       case ButtonSize.small:
-        return AppSpacing.symmetric(horizontal: AppSpacing.sp3, vertical: AppSpacing.sp2);
+        return AppSpacing.symmetric(
+          horizontal: AppSpacing.sp3,
+          vertical: AppSpacing.sp2,
+        );
       case ButtonSize.medium:
         return AppSpacing.buttonPadding;
       case ButtonSize.large:
-        return AppSpacing.symmetric(horizontal: AppSpacing.sp6, vertical: AppSpacing.sp4);
+        return AppSpacing.symmetric(
+          horizontal: AppSpacing.sp6,
+          vertical: AppSpacing.sp4,
+        );
     }
   }
 
   Color _getForegroundColor(bool isDisabled) {
     if (isDisabled) return AppColors.textTertiary;
-    
+
     switch (variant) {
       case ButtonVariant.primary:
       case ButtonVariant.secondary:
@@ -246,8 +289,8 @@ class BaseButton extends StatelessWidget {
     final iconSize = size == ButtonSize.small
         ? AppSpacing.iconSizeS
         : size == ButtonSize.medium
-            ? AppSpacing.iconSizeM
-            : AppSpacing.iconSizeL;
+        ? AppSpacing.iconSizeM
+        : AppSpacing.iconSizeL;
 
     return BaseButton(
       key: key,
