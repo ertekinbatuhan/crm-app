@@ -27,7 +27,7 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.black, size: 24),
           onPressed: onSettingsPressed ?? () {
-            // Default settings action
+
             print('Settings pressed');
           },
         ),

@@ -16,7 +16,7 @@ class CustomBottomNavigation extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
     final safeAreaBottom = mediaQuery.padding.bottom;
 
-    // Dynamic padding values
+
     final verticalPadding = screenHeight > 800 ? 16.0 : 12.0;
     final horizontalPadding = mediaQuery.size.width * 0.04;
 

@@ -19,6 +19,7 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   int selectedNavIndex = 0;
+  final GlobalKey<ContactsViewWidgetState> _contactsKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class _DashboardViewState extends State<DashboardView> {
               index: selectedNavIndex,
               children: [
                 _buildHomeView(),
-                const ContactsView(),
+                ContactsView(key: _contactsKey),
                 const DealsView(),
                 const TasksView(),
                 const ReportsView(),
@@ -55,10 +56,45 @@ class _DashboardViewState extends State<DashboardView> {
   PreferredSizeWidget _buildAppBar() {
     final titles = ['Dashboard', 'Contacts', 'Deals', 'Tasks', 'Reports'];
 
+
+    if (selectedNavIndex == 1) {
+      return AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text(
+          titles[selectedNavIndex],
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+
+              if (_contactsKey.currentState != null) {
+                _contactsKey.currentState!.showAddContactDialog();
+              }
+            },
+            icon: const Icon(Icons.add),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF34C759),
+              foregroundColor: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      );
+    }
+
+
     return AppHeader.withSettings(
       title: titles[selectedNavIndex],
       onSettingsPressed: () {
-        // Settings action
+
         print('Settings pressed');
       },
     );

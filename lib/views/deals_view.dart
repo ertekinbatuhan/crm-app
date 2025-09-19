@@ -50,7 +50,7 @@ class _DealsViewState extends State<DealsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+
               Row(
                 children: [
                   Container(
@@ -86,7 +86,7 @@ class _DealsViewState extends State<DealsView> {
 
               const SizedBox(height: 24),
 
-              // Search
+
               TextField(
                 onChanged: viewModel.updateSearchQuery,
                 decoration: InputDecoration(
@@ -103,7 +103,7 @@ class _DealsViewState extends State<DealsView> {
 
               const SizedBox(height: 24),
 
-              // Stats
+
               Row(
                 children: [
                   Expanded(
@@ -128,7 +128,7 @@ class _DealsViewState extends State<DealsView> {
 
               const SizedBox(height: 24),
 
-              // Deals List
+
               if (viewModel.deals.isEmpty)
                 const Center(
                   child: Column(

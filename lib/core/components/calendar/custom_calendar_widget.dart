@@ -124,12 +124,12 @@ class CustomCalendarWidget extends StatelessWidget {
 
     final days = <Widget>[];
 
-    // Add empty spaces for days before the first day of the month
+
     for (int i = 0; i < firstDayWeekday; i++) {
       days.add(const SizedBox(width: 32, height: 32));
     }
 
-    // Add days of the month
+
     for (int day = 1; day <= lastDayOfMonth.day; day++) {
       final date = DateTime(focusedDate.year, focusedDate.month, day);
       days.add(_buildDayCell(date));

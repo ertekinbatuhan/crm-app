@@ -1,194 +1,234 @@
 import 'package:flutter/foundation.dart';
-import '../../models/contact_model.dart';
-import '../../services/contact_service.dart';
+import 'package:equatable/equatable.dart';
+import '../models/contact_model.dart';
+import '../core/repositories/contact_repository.dart';
+
+@immutable
+class ContactsState extends Equatable {
+  final ContactsViewState viewState;
+  final List<Contact> contacts;
+  final List<Contact> filteredContacts;
+  final String searchQuery;
+  final String errorMessage;
+  final String selectedFilter;
+
+  const ContactsState({
+    required this.viewState,
+    required this.contacts,
+    required this.filteredContacts,
+    required this.searchQuery,
+    required this.errorMessage,
+    required this.selectedFilter,
+  });
+
+  factory ContactsState.initial() {
+    return const ContactsState(
+      viewState: ContactsViewState.initial,
+      contacts: [],
+      filteredContacts: [],
+      searchQuery: '',
+      errorMessage: '',
+      selectedFilter: 'All',
+    );
+  }
+
+  ContactsState copyWith({
+    ContactsViewState? viewState,
+    List<Contact>? contacts,
+    List<Contact>? filteredContacts,
+    String? searchQuery,
+    String? errorMessage,
+    String? selectedFilter,
+  }) {
+    return ContactsState(
+      viewState: viewState ?? this.viewState,
+      contacts: contacts ?? this.contacts,
+      filteredContacts: filteredContacts ?? this.filteredContacts,
+      searchQuery: searchQuery ?? this.searchQuery,
+      errorMessage: errorMessage ?? this.errorMessage,
+      selectedFilter: selectedFilter ?? this.selectedFilter,
+    );
+  }
+
+  bool get isLoading => viewState == ContactsViewState.loading;
+  bool get hasError => viewState == ContactsViewState.error;
+  bool get isLoaded => viewState == ContactsViewState.loaded;
+  int get totalContactsCount => contacts.length;
+
+  @override
+  List<Object?> get props => [
+        viewState,
+        contacts,
+        filteredContacts,
+        searchQuery,
+        errorMessage,
+        selectedFilter,
+      ];
+}
 
 enum ContactsViewState { initial, loading, loaded, error }
 
 class ContactsViewModel extends ChangeNotifier {
-  final ContactService _contactService;
+  final ContactRepository _contactRepository;
+  ContactsState _state = ContactsState.initial();
 
-  ContactsViewModel({required ContactService contactService})
-    : _contactService = contactService;
+  ContactsViewModel(this._contactRepository) {
+    loadContacts();
+  }
 
-  // State
-  ContactsViewState _state = ContactsViewState.initial;
-  List<Contact> _contacts = [];
-  List<Contact> _filteredContacts = [];
-  String _searchQuery = '';
-  String _errorMessage = '';
-  String _selectedFilter = 'All'; // All, Recent, Favorites
+  ContactsState get state => _state;
 
-  // Getters
-  ContactsViewState get state => _state;
-  List<Contact> get contacts => _filteredContacts;
-  List<Contact> get allContacts => _contacts;
-  String get searchQuery => _searchQuery;
-  String get selectedFilter => _selectedFilter;
-  String get errorMessage => _errorMessage;
+  List<Contact> get contacts => _state.filteredContacts;
+  List<Contact> get allContacts => _state.contacts;
+  String get searchQuery => _state.searchQuery;
+  String get selectedFilter => _state.selectedFilter;
+  String get errorMessage => _state.errorMessage;
+  bool get isLoading => _state.isLoading;
+  bool get hasError => _state.hasError;
+  bool get isLoaded => _state.isLoaded;
+  int get totalContactsCount => _state.totalContactsCount;
 
-  bool get isLoading => _state == ContactsViewState.loading;
-  bool get hasError => _state == ContactsViewState.error;
-  bool get isLoaded => _state == ContactsViewState.loaded;
+  void _updateState(ContactsState newState) {
+    _state = newState;
+    notifyListeners();
+  }
 
-  // Business Logic Methods
   Future<void> loadContacts() async {
-    _setState(ContactsViewState.loading);
+    _updateState(_state.copyWith(viewState: ContactsViewState.loading));
+    
     try {
-      _contacts = await _contactService.getContacts();
-      _applyFilters();
-      _setState(ContactsViewState.loaded);
+      final contacts = await _contactRepository.getContacts();
+      final filteredContacts = _applyFilters(contacts, _state.searchQuery, _state.selectedFilter);
+      
+      _updateState(_state.copyWith(
+        viewState: ContactsViewState.loaded,
+        contacts: contacts,
+        filteredContacts: filteredContacts,
+        errorMessage: '',
+      ));
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: ContactsViewState.error,
+        errorMessage: e.toString(),
+      ));
     }
   }
 
-  Future<void> createContact(Contact contact) async {
+  Future<bool> createContact(Contact contact) async {
     try {
-      final newContact = await _contactService.createContact(contact);
-      _contacts.add(newContact);
-      _applyFilters();
-      notifyListeners();
+      final newContact = await _contactRepository.createContact(contact);
+      final updatedContacts = List<Contact>.from(_state.contacts)..add(newContact);
+      final filteredContacts = _applyFilters(updatedContacts, _state.searchQuery, _state.selectedFilter);
+      
+      _updateState(_state.copyWith(
+        contacts: updatedContacts,
+        filteredContacts: filteredContacts,
+      ));
+      
+      return true;
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: ContactsViewState.error,
+        errorMessage: e.toString(),
+      ));
+      return false;
     }
   }
 
-  Future<void> updateContact(Contact contact) async {
+  Future<bool> updateContact(Contact contact) async {
     try {
-      await _contactService.updateContact(contact);
-      final index = _contacts.indexWhere((c) => c.id == contact.id);
+      final updatedContact = await _contactRepository.updateContact(contact);
+      final updatedContacts = List<Contact>.from(_state.contacts);
+      final index = updatedContacts.indexWhere((c) => c.id == contact.id);
+      
       if (index != -1) {
-        _contacts[index] = contact;
-        _applyFilters();
-        notifyListeners();
+        updatedContacts[index] = updatedContact;
+        final filteredContacts = _applyFilters(updatedContacts, _state.searchQuery, _state.selectedFilter);
+        
+        _updateState(_state.copyWith(
+          contacts: updatedContacts,
+          filteredContacts: filteredContacts,
+        ));
       }
+      
+      return true;
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: ContactsViewState.error,
+        errorMessage: e.toString(),
+      ));
+      return false;
     }
   }
 
   Future<void> deleteContact(String contactId) async {
     try {
-      await _contactService.deleteContact(contactId);
-      _contacts.removeWhere((contact) => contact.id == contactId);
-      _applyFilters();
-      notifyListeners();
+      await _contactRepository.deleteContact(contactId);
+      final updatedContacts = List<Contact>.from(_state.contacts)
+        ..removeWhere((contact) => contact.id == contactId);
+      final filteredContacts = _applyFilters(updatedContacts, _state.searchQuery, _state.selectedFilter);
+      
+      _updateState(_state.copyWith(
+        contacts: updatedContacts,
+        filteredContacts: filteredContacts,
+      ));
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: ContactsViewState.error,
+        errorMessage: e.toString(),
+      ));
     }
-  }
-
-  // Search and Filter functionality
-  void setSearchQuery(String query) {
-    _searchQuery = query.toLowerCase();
-    _applyFilters();
-    notifyListeners();
   }
 
   void updateSearchQuery(String query) {
-    setSearchQuery(query);
+    final filteredContacts = _applyFilters(_state.contacts, query, _state.selectedFilter);
+    
+    _updateState(_state.copyWith(
+      searchQuery: query,
+      filteredContacts: filteredContacts,
+    ));
   }
 
   void setFilter(String filter) {
-    _selectedFilter = filter;
-    _applyFilters();
-    notifyListeners();
+    final filteredContacts = _applyFilters(_state.contacts, _state.searchQuery, filter);
+    
+    _updateState(_state.copyWith(
+      selectedFilter: filter,
+      filteredContacts: filteredContacts,
+    ));
   }
 
-  void changeFilter(String filter) {
-    setFilter(filter);
-  }
+  List<Contact> _applyFilters(List<Contact> contacts, String searchQuery, String selectedFilter) {
+    List<Contact> filtered = List.from(contacts);
 
-  void clearSearch() {
-    _searchQuery = '';
-    _applyFilters();
-    notifyListeners();
-  }
-
-  void _applyFilters() {
-    List<Contact> filtered = List.from(_contacts);
-
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
+    if (searchQuery.isNotEmpty) {
+      final lowercaseQuery = searchQuery.toLowerCase();
       filtered = filtered.where((contact) {
-        return contact.name.toLowerCase().contains(_searchQuery) ||
-            (contact.email?.toLowerCase().contains(_searchQuery) ?? false) ||
-            (contact.company?.toLowerCase().contains(_searchQuery) ?? false);
+        return contact.name.toLowerCase().contains(lowercaseQuery) ||
+               (contact.email?.toLowerCase().contains(lowercaseQuery) ?? false) ||
+               (contact.phone?.contains(searchQuery) ?? false) ||
+               (contact.company?.toLowerCase().contains(lowercaseQuery) ?? false);
       }).toList();
     }
-
-    // Apply category filter
-    switch (_selectedFilter) {
+    switch (selectedFilter) {
       case 'Recent':
-        // For demo purposes, just take the last 10
-        filtered = filtered.take(10).toList();
         break;
       case 'Favorites':
-        // This would require a favorite field in the model
-        // For now, just return all
         break;
       case 'All':
       default:
-        // No additional filtering
         break;
     }
 
-    _filteredContacts = filtered;
+    return filtered;
   }
 
-  // Helper methods
-  void _setState(ContactsViewState newState) {
-    _state = newState;
-    notifyListeners();
+  void clearCache() {
+    _contactRepository.clearCache();
   }
 
-  void _setError(String message) {
-    _state = ContactsViewState.error;
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  // Contacts specific business logic
-  Contact? getContactById(String id) {
-    try {
-      return _contacts.firstWhere((contact) => contact.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  List<Contact> getContactsByCompany(String company) {
-    return _contacts
-        .where(
-          (contact) => contact.company?.toLowerCase() == company.toLowerCase(),
-        )
-        .toList();
-  }
-
-  int get totalContacts => _contacts.length;
-  int get recentContacts => 5; // Mock implementation
-  int get totalContactsCount => _contacts.length;
-  int get filteredContactsCount => _filteredContacts.length;
-
-  List<String> get allCompanies {
-    return _contacts
-        .where(
-          (contact) => contact.company != null && contact.company!.isNotEmpty,
-        )
-        .map((contact) => contact.company!)
-        .toSet()
-        .toList()
-      ..sort();
-  }
-
-  Map<String, int> get contactsByCompany {
-    final Map<String, int> companyCount = {};
-    for (final contact in _contacts) {
-      if (contact.company != null && contact.company!.isNotEmpty) {
-        companyCount[contact.company!] =
-            (companyCount[contact.company!] ?? 0) + 1;
-      }
-    }
-    return companyCount;
+  void refreshContacts() {
+    clearCache();
+    loadContacts();
   }
 }

@@ -44,7 +44,7 @@ class AppText extends StatelessWidget {
     );
   }
 
-  // Factory constructors for common text styles
+
   factory AppText.heading1(String text, {Color? color}) {
     return AppText(
       text,

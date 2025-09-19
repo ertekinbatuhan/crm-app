@@ -54,7 +54,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     return Size.fromHeight(height);
   }
 
-  // Factory constructors for common patterns
+
   factory AppHeader.withSettings({
     required String title,
     VoidCallback? onSettingsPressed,

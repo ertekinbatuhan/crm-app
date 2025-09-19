@@ -28,7 +28,7 @@ class TasksCalendarHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Today button and Calendar header
+
           Row(
             children: [
               Container(
@@ -57,7 +57,7 @@ class TasksCalendarHeader extends StatelessWidget {
           
           const SizedBox(height: 20),
           
-          // Calendar Widget
+
           CustomCalendarWidget(
             selectedDate: viewModel.selectedDate,
             focusedDate: viewModel.currentMonth,

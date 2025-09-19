@@ -33,7 +33,7 @@ class AppSection<T> extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Header
+
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: Row(
@@ -52,7 +52,7 @@ class AppSection<T> extends StatelessWidget {
             ),
           ),
           
-          // Content
+
           if (items.isEmpty && showEmptyState)
             _buildEmptyState(defaultEmptyMessage)
           else

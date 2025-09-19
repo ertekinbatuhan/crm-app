@@ -86,7 +86,7 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  // Factory constructors for common button styles
+
   factory AppButton.primary({
     required String text,
     required VoidCallback? onPressed,

@@ -57,7 +57,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
+
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -111,7 +111,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
               ),
             ),
           
-          // Form Content
+
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -119,7 +119,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Task Name
+
                     _buildInputField(
                       label: 'Task Name',
                       child: TextFormField(
@@ -139,7 +139,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     
                     const SizedBox(height: 12),
                     
-                    // Due Date
+
                     _buildInputField(
                       label: 'Due Date',
                       child: GestureDetector(
@@ -174,7 +174,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     
                     const SizedBox(height: 12),
                     
-                    // Priority
+
                     _buildInputField(
                       label: 'Priority',
                       child: Theme(
@@ -236,7 +236,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     
                     const SizedBox(height: 12),
                     
-                    // Associated Contact
+
                     _buildInputField(
                       label: 'Associated Contact',
                       child: Theme(
@@ -298,7 +298,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     
                     const SizedBox(height: 12),
                     
-                    // Associated Deal
+
                     _buildInputField(
                       label: 'Associated Deal',
                       child: Theme(
@@ -360,7 +360,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     
                     const SizedBox(height: 16),
                     
-                    // Create Task Button
+
                     Container(
                       width: double.infinity,
                       height: 56,
