@@ -7,12 +7,15 @@ import '../services/deal_service.dart';
 import '../services/contact_service.dart';
 import '../services/task_service.dart';
 import '../services/meeting_service.dart';
+
 enum ReportsViewState { initial, loading, loaded, error }
+
 class ReportsViewModel extends ChangeNotifier {
   final DealService _dealService;
   final ContactService _contactService;
   final TaskService _taskService;
   final MeetingService _meetingService;
+
   ReportsViewModel({
     required DealService dealService,
     required ContactService contactService,

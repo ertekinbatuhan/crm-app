@@ -7,12 +7,15 @@ import '../services/task_service.dart';
 import '../services/contact_service.dart';
 import '../services/deal_service.dart';
 import '../services/meeting_service.dart';
+
 enum DashboardViewState { initial, loading, loaded, error }
+
 class DashboardViewModel extends ChangeNotifier {
   final TaskService _taskService;
   final ContactService _contactService;
   final DealService _dealService;
   final MeetingService _meetingService;
+
   DashboardViewModel({
     required TaskService taskService,
     required ContactService contactService,
@@ -22,6 +25,7 @@ class DashboardViewModel extends ChangeNotifier {
        _contactService = contactService,
        _dealService = dealService,
        _meetingService = meetingService;
+
   DashboardViewState _state = DashboardViewState.initial;
   List<Task> _recentTasks = [];
   List<Contact> _recentContacts = [];
@@ -33,10 +37,12 @@ class DashboardViewModel extends ChangeNotifier {
   List<Contact> get recentContacts => _recentContacts;
   List<Deal> get recentDeals => _recentDeals;
   List<Meeting> get upcomingMeetings => _upcomingMeetings;
+
   String get errorMessage => _errorMessage;
   bool get isLoading => _state == DashboardViewState.loading;
   bool get hasError => _state == DashboardViewState.error;
   bool get isLoaded => _state == DashboardViewState.loaded;
+  
   Future<void> loadDashboardData() async {
     _setState(DashboardViewState.loading);
     try {

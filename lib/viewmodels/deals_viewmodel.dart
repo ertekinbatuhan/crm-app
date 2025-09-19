@@ -1,10 +1,14 @@
 import 'package:flutter/foundation.dart';
 import '../models/deal_model.dart';
 import '../services/deal_service.dart';
+
 enum DealsViewState { initial, loading, loaded, error }
+
 class DealsViewModel extends ChangeNotifier {
   final DealService _dealService;
+
   DealsViewModel(this._dealService);
+
   DealsViewState _state = DealsViewState.initial;
   List<Deal> _deals = [];
   List<Deal> _filteredDeals = [];
