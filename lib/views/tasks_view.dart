@@ -77,17 +77,17 @@ class _TasksViewState extends State<TasksView>
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Calendar Header
+
           TasksCalendarHeader(viewModel: viewModel),
 
-          // Tasks Section
+
           AppSection(
             title: 'Tasks',
             items: viewModel.selectedDateTasks,
             itemBuilder: (task) => _buildTaskItem(task, viewModel),
           ),
 
-          // Meetings Section  
+
           AppSection(
             title: 'Meetings',
             items: const [],

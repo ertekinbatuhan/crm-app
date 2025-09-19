@@ -74,7 +74,7 @@ class AppAvatar extends StatelessWidget {
     );
   }
 
-  // Factory constructors for common avatar types
+
   factory AppAvatar.small({
     String? imageUrl,
     String? initials,

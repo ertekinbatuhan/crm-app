@@ -32,12 +32,12 @@ class DashboardContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Stats Cards
+
               DashboardStatsSection(stats: stats),
               
               const SizedBox(height: 24),
 
-              // Sales Pipeline
+
               SalesPipelineCard(
                 totalAmount: totalAmount,
                 period: period,
@@ -46,7 +46,7 @@ class DashboardContent extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Notifications
+
               NotificationCard(notifications: notifications),
 
               const SizedBox(height: 100), // Extra space for bottom navigation

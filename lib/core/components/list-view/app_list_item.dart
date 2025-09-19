@@ -65,7 +65,7 @@ class AppListItem extends StatelessWidget {
   }
 }
 
-// Helper widgets for common patterns
+
 class AppListItemLeading extends StatelessWidget {
   final Widget child;
   final Color? backgroundColor;

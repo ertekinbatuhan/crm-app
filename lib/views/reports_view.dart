@@ -49,7 +49,7 @@ class _ReportsViewState extends State<ReportsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+
               Row(
                 children: [
                   Container(
@@ -95,22 +95,22 @@ class _ReportsViewState extends State<ReportsView> {
 
               const SizedBox(height: 24),
 
-              // Key Metrics
+
               _buildKeyMetrics(viewModel),
 
               const SizedBox(height: 24),
 
-              // Revenue Chart Section
+
               _buildRevenueSection(viewModel),
 
               const SizedBox(height: 24),
 
-              // Deals by Status
+
               _buildDealsSection(viewModel),
 
               const SizedBox(height: 24),
 
-              // Performance Metrics
+
               _buildPerformanceSection(viewModel),
             ],
           ),

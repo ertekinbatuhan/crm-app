@@ -84,7 +84,7 @@ class AppStatCard extends StatelessWidget {
     );
   }
 
-  // Factory constructors for common patterns
+
   factory AppStatCard.positive({
     required String title,
     required String value,
