@@ -6,13 +6,12 @@ import 'core/di/service_locator.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Firebase'i güvenli şekilde başlat
   try {
     await Firebase.initializeApp();
-    print('✅ Firebase başarıyla başlatıldı');
+    print('✅ Firebase initialized successfully');
   } catch (e) {
-    print('❌ Firebase başlatılamadı: $e');
-    print('Uygulama Firebase olmadan çalışacak');
+    print('❌ Firebase initialization failed: $e');
+    print('The application will run without Firebase services.');
   }
   
   ServiceLocator.setup();
