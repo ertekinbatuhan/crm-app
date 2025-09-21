@@ -4,6 +4,7 @@ import '../models/contact_model.dart';
 
 abstract class ContactService {
   Future<List<Contact>> getContacts();
+  Stream<List<Contact>> getContactsStream();
   Future<Contact> createContact(Contact contact);
   Future<Contact> updateContact(Contact contact);
   Future<void> deleteContact(String contactId);
@@ -30,9 +31,15 @@ class MockContactService implements ContactService {
 
   @override
   Future<List<Contact>> getContacts() async {
-    // Simulate network delay
+    
     await Future.delayed(const Duration(milliseconds: 500));
     return List.from(_contacts);
+  }
+
+  @override
+  Stream<List<Contact>> getContactsStream() {
+    
+    return Stream.periodic(const Duration(seconds: 1), (count) => List.from(_contacts));
   }
 
   @override
@@ -86,6 +93,25 @@ class FirebaseContactService implements ContactService {
       }).toList();
     } catch (e) {
       throw Exception('Error loading contacts: $e');
+    }
+  }
+
+  @override
+  Stream<List<Contact>> getContactsStream() {
+    try {
+      return _firestore
+          .collection(_collection)
+          .orderBy('name')
+          .snapshots()
+          .map((QuerySnapshot snapshot) {
+            return snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              data['id'] = doc.id;
+              return Contact.fromMap(data);
+            }).toList();
+          });
+    } catch (e) {
+      throw Exception('Error streaming contacts: $e');
     }
   }
 

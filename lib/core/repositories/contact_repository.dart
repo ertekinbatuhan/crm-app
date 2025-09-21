@@ -3,6 +3,7 @@ import '../../services/contact_service.dart';
 
 abstract class ContactRepository {
   Future<List<Contact>> getContacts();
+  Stream<List<Contact>> getContactsStream();
   Future<Contact> createContact(Contact contact);
   Future<Contact> updateContact(Contact contact);
   Future<void> deleteContact(String contactId);
@@ -65,6 +66,18 @@ class ContactRepositoryImpl implements ContactRepository {
       }
       rethrow;
     }
+  }
+
+  @override
+  Stream<List<Contact>> getContactsStream() {
+    // For real-time updates, we don't want to use cache
+    // Always get fresh data from the service
+    return _contactService.getContactsStream().map((contacts) {
+      // Update cache when we receive new data
+      _cachedContacts = contacts;
+      _lastCacheTime = DateTime.now();
+      return contacts;
+    });
   }
 
   @override

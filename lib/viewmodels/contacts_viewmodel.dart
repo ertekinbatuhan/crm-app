@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
+import 'dart:async';
 import '../models/contact_model.dart';
 import '../core/repositories/contact_repository.dart';
 
@@ -71,9 +72,10 @@ enum ContactsViewState { initial, loading, loaded, error }
 class ContactsViewModel extends ChangeNotifier {
   final ContactRepository _contactRepository;
   ContactsState _state = ContactsState.initial();
+  StreamSubscription<List<Contact>>? _contactsSubscription;
 
   ContactsViewModel(this._contactRepository) {
-    loadContacts();
+    _listenToContacts();
   }
 
   ContactsState get state => _state;
@@ -93,7 +95,38 @@ class ContactsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _listenToContacts() {
+    _updateState(_state.copyWith(viewState: ContactsViewState.loading));
+    
+    _contactsSubscription = _contactRepository.getContactsStream().listen(
+      (contacts) {
+        final filteredContacts = _applyFilters(contacts, _state.searchQuery, _state.selectedFilter);
+        
+        _updateState(_state.copyWith(
+          viewState: ContactsViewState.loaded,
+          contacts: contacts,
+          filteredContacts: filteredContacts,
+          errorMessage: '',
+        ));
+      },
+      onError: (error) {
+        _updateState(_state.copyWith(
+          viewState: ContactsViewState.error,
+          errorMessage: error.toString(),
+        ));
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _contactsSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> loadContacts() async {
+    // This method is kept for manual refresh scenarios
+    // But now we primarily rely on the real-time stream
     _updateState(_state.copyWith(viewState: ContactsViewState.loading));
     
     try {
@@ -116,15 +149,8 @@ class ContactsViewModel extends ChangeNotifier {
 
   Future<bool> createContact(Contact contact) async {
     try {
-      final newContact = await _contactRepository.createContact(contact);
-      final updatedContacts = List<Contact>.from(_state.contacts)..add(newContact);
-      final filteredContacts = _applyFilters(updatedContacts, _state.searchQuery, _state.selectedFilter);
-      
-      _updateState(_state.copyWith(
-        contacts: updatedContacts,
-        filteredContacts: filteredContacts,
-      ));
-      
+      await _contactRepository.createContact(contact);
+      // Real-time stream will automatically update the state
       return true;
     } catch (e) {
       _updateState(_state.copyWith(
@@ -137,20 +163,8 @@ class ContactsViewModel extends ChangeNotifier {
 
   Future<bool> updateContact(Contact contact) async {
     try {
-      final updatedContact = await _contactRepository.updateContact(contact);
-      final updatedContacts = List<Contact>.from(_state.contacts);
-      final index = updatedContacts.indexWhere((c) => c.id == contact.id);
-      
-      if (index != -1) {
-        updatedContacts[index] = updatedContact;
-        final filteredContacts = _applyFilters(updatedContacts, _state.searchQuery, _state.selectedFilter);
-        
-        _updateState(_state.copyWith(
-          contacts: updatedContacts,
-          filteredContacts: filteredContacts,
-        ));
-      }
-      
+      await _contactRepository.updateContact(contact);
+      // Real-time stream will automatically update the state
       return true;
     } catch (e) {
       _updateState(_state.copyWith(
@@ -164,14 +178,7 @@ class ContactsViewModel extends ChangeNotifier {
   Future<void> deleteContact(String contactId) async {
     try {
       await _contactRepository.deleteContact(contactId);
-      final updatedContacts = List<Contact>.from(_state.contacts)
-        ..removeWhere((contact) => contact.id == contactId);
-      final filteredContacts = _applyFilters(updatedContacts, _state.searchQuery, _state.selectedFilter);
-      
-      _updateState(_state.copyWith(
-        contacts: updatedContacts,
-        filteredContacts: filteredContacts,
-      ));
+      // Real-time stream will automatically update the state
     } catch (e) {
       _updateState(_state.copyWith(
         viewState: ContactsViewState.error,
@@ -228,7 +235,9 @@ class ContactsViewModel extends ChangeNotifier {
   }
 
   void refreshContacts() {
+    // Cancel current subscription and restart listening
+    _contactsSubscription?.cancel();
     clearCache();
-    loadContacts();
+    _listenToContacts();
   }
 }

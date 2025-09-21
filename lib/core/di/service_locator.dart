@@ -15,15 +15,14 @@ final GetIt serviceLocator = GetIt.instance;
 
 class ServiceLocator {
   static void setup() {
-    // Firebase durumunu kontrol et ve uygun ContactService'i kullan
     ContactService contactService;
     try {
-      Firebase.app(); // Firebase başlatılmış mı kontrol et
+      Firebase.app(); 
       contactService = FirebaseContactService();
-      print('✅ Firebase ContactService kullanılıyor');
+      print('✅ Using Firebase ContactService');
     } catch (e) {
       contactService = MockContactService();
-      print('📝 Mock ContactService kullanılıyor (Firebase bulunamadı)');
+      print('📝 Using Mock ContactService (Firebase not found)');
     }
 
     serviceLocator.registerLazySingleton<ContactService>(

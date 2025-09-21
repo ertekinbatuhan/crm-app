@@ -16,14 +16,6 @@ class ContactsView extends StatefulWidget {
 }
 
 class ContactsViewWidgetState extends State<ContactsView> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ContactsViewModel>().loadContacts();
-    });
-  }
-
   void showAddContactDialog() {
     final viewModel = context.read<ContactsViewModel>();
     _showContactDialog(viewModel);
@@ -243,9 +235,6 @@ class ContactsViewWidgetState extends State<ContactsView> {
     TextEditingController companyController,
   ) async {
     if (nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name is required')),
-      );
       return;
     }
 
@@ -268,13 +257,7 @@ class ContactsViewWidgetState extends State<ContactsView> {
 
     if (success && mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(existingContact != null 
-              ? 'Contact updated successfully' 
-              : 'Contact added successfully'),
-        ),
-      );
+      // Real-time stream will automatically update the UI
     }
   }
 
@@ -314,14 +297,7 @@ class ContactsViewWidgetState extends State<ContactsView> {
             onPressed: () async {
               Navigator.pop(context);
               await viewModel.deleteContact(contact.id);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${contact.name} deleted successfully'),
-                    backgroundColor: Colors.red[600],
-                  ),
-                );
-              }
+              // Real-time stream will automatically update the UI
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red[600],
