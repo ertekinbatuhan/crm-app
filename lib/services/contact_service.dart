@@ -9,6 +9,63 @@ abstract class ContactService {
   Future<void> deleteContact(String contactId);
 }
 
+// Mock implementation for when Firebase is not available
+class MockContactService implements ContactService {
+  final List<Contact> _contacts = [
+    Contact(
+      id: '1',
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '+1 234 567 8900',
+      company: 'Tech Corp',
+    ),
+    Contact(
+      id: '2',
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      phone: '+1 234 567 8901',
+      company: 'Design Studio',
+    ),
+  ];
+
+  @override
+  Future<List<Contact>> getContacts() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    return List.from(_contacts);
+  }
+
+  @override
+  Future<Contact> createContact(Contact contact) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final newContact = Contact(
+      id: const Uuid().v4(),
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      company: contact.company,
+    );
+    _contacts.add(newContact);
+    return newContact;
+  }
+
+  @override
+  Future<Contact> updateContact(Contact contact) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final index = _contacts.indexWhere((c) => c.id == contact.id);
+    if (index != -1) {
+      _contacts[index] = contact;
+    }
+    return contact;
+  }
+
+  @override
+  Future<void> deleteContact(String contactId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    _contacts.removeWhere((contact) => contact.id == contactId);
+  }
+}
+
 
 class FirebaseContactService implements ContactService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

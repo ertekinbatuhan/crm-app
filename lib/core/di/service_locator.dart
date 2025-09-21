@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../../services/contact_service.dart';
 import '../../services/deal_service.dart';
 import '../../services/task_service.dart';
@@ -14,9 +15,19 @@ final GetIt serviceLocator = GetIt.instance;
 
 class ServiceLocator {
   static void setup() {
+    // Firebase durumunu kontrol et ve uygun ContactService'i kullan
+    ContactService contactService;
+    try {
+      Firebase.app(); // Firebase başlatılmış mı kontrol et
+      contactService = FirebaseContactService();
+      print('✅ Firebase ContactService kullanılıyor');
+    } catch (e) {
+      contactService = MockContactService();
+      print('📝 Mock ContactService kullanılıyor (Firebase bulunamadı)');
+    }
 
     serviceLocator.registerLazySingleton<ContactService>(
-      () => FirebaseContactService(),
+      () => contactService,
     );
     serviceLocator.registerLazySingleton<DealService>(
       () => DealServiceImpl(),

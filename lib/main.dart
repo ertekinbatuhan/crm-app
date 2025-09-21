@@ -5,9 +5,16 @@ import 'core/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   
-
+  // Firebase'i güvenli şekilde başlat
+  try {
+    await Firebase.initializeApp();
+    print('✅ Firebase başarıyla başlatıldı');
+  } catch (e) {
+    print('❌ Firebase başlatılamadı: $e');
+    print('Uygulama Firebase olmadan çalışacak');
+  }
+  
   ServiceLocator.setup();
   
   runApp(const MyApp());
