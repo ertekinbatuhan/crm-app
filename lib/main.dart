@@ -5,9 +5,15 @@ import 'core/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   
-
+  try {
+    await Firebase.initializeApp();
+    print('✅ Firebase initialized successfully');
+  } catch (e) {
+    print('❌ Firebase initialization failed: $e');
+    print('The application will run without Firebase services.');
+  }
+  
   ServiceLocator.setup();
   
   runApp(const MyApp());
