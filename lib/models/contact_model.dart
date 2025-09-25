@@ -13,6 +13,8 @@ class Contact {
     this.company,
   });
 
+
+  // Serialize to/from Map for easier storage and retrieval
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -23,6 +25,7 @@ class Contact {
     };
   }
 
+// Deserialize from Map
   factory Contact.fromMap(Map<String, dynamic> map) {
     return Contact(
       id: map['id'] ?? '',
@@ -33,6 +36,7 @@ class Contact {
     );
   }
 
+// Create a copy of the contact with updated fields
   Contact copyWith({
     String? id,
     String? name,
@@ -49,6 +53,8 @@ class Contact {
     );
   }
 
+
+// Override equality and hashCode for proper comparison
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -60,6 +66,7 @@ class Contact {
         other.company == company;
   }
 
+// Override hashCode for proper comparison
   @override
   int get hashCode {
     return id.hashCode ^
@@ -69,6 +76,7 @@ class Contact {
         company.hashCode;
   }
 
+// Override toString for better debugging
   @override
   String toString() {
     return 'Contact(id: $id, name: $name, email: $email, phone: $phone, company: $company)';

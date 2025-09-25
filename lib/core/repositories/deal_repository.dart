@@ -2,7 +2,6 @@ import '../../models/deal_model.dart';
 import '../../services/deal_service.dart';
 
 abstract class DealRepository {
-  Future<List<Deal>> getDeals();
   Stream<List<Deal>> getDealsStream();
   Future<Deal> createDeal(Deal deal);
   Future<Deal> updateDeal(Deal deal);
@@ -44,25 +43,6 @@ class DealRepositoryImpl implements DealRepository {
   }
 
   @override
-  Future<List<Deal>> getDeals() async {
-    if (hasCache) {
-      return _cachedDeals!;
-    }
-
-    try {
-      final deals = await _dealService.getDeals();
-      _cachedDeals = deals;
-      _lastCacheTime = DateTime.now();
-      return deals;
-    } catch (e) {
-      if (_cachedDeals != null) {
-        return _cachedDeals!;
-      }
-      rethrow;
-    }
-  }
-
-  @override
   Stream<List<Deal>> getDealsStream() {
     return _dealService.getDealsStream().map((deals) {
       _cachedDeals = deals;
@@ -95,7 +75,8 @@ class DealRepositoryImpl implements DealRepository {
 
   @override
   Future<List<Deal>> searchDeals(String query) async {
-    final deals = await getDeals();
+    // Use cached data from stream, or wait for first stream emission if no cache
+    final deals = _cachedDeals ?? await getDealsStream().first;
     
     if (query.isEmpty) return deals;
     

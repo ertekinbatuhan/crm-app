@@ -46,7 +46,9 @@ class ContactsViewWidgetState extends State<ContactsView> {
                 emptyActionLabel: AppStrings.addContact,
                 onEmptyAction: showAddContactDialog,
                 errorMessage: viewModel.errorMessage,
-                onRetry: () => viewModel.loadContacts(),
+                onRetry: () {
+                  // Stream will automatically retry on error
+                },
                 listBuilder: (contacts) => _buildSuccessContent(viewModel, contacts),
               ),
             ),

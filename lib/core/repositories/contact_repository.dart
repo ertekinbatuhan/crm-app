@@ -2,14 +2,12 @@ import '../../models/contact_model.dart';
 import '../../services/contact_service.dart';
 
 abstract class ContactRepository {
-  Future<List<Contact>> getContacts();
   Stream<List<Contact>> getContactsStream();
   Future<Contact> createContact(Contact contact);
   Future<Contact> updateContact(Contact contact);
   Future<void> deleteContact(String contactId);
   Future<List<Contact>> searchContacts(String query);
   
-
   void clearCache();
   bool get hasCache;
 }
@@ -47,27 +45,6 @@ class ContactRepositoryImpl implements ContactRepository {
   }
 
   @override
-  Future<List<Contact>> getContacts() async {
-
-    if (hasCache) {
-      return _cachedContacts!;
-    }
-
-    try {
-      final contacts = await _contactService.getContacts();
-      _cachedContacts = contacts;
-      _lastCacheTime = DateTime.now();
-      return contacts;
-    } catch (e) {
-
-      if (_cachedContacts != null) {
-        return _cachedContacts!;
-      }
-      rethrow;
-    }
-  }
-
-  @override
   Stream<List<Contact>> getContactsStream() {
     return _contactService.getContactsStream().map((contacts) {
       _cachedContacts = contacts;
@@ -98,7 +75,8 @@ class ContactRepositoryImpl implements ContactRepository {
 
   @override
   Future<List<Contact>> searchContacts(String query) async {
-    final contacts = await getContacts();
+    // Use cached data from stream, or wait for first stream emission if no cache
+    final contacts = _cachedContacts ?? await getContactsStream().first;
     
     if (query.isEmpty) return contacts;
     

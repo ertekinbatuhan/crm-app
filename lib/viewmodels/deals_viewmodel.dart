@@ -141,32 +141,6 @@ class DealsViewModel extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> loadDeals() async {
-    _updateState(_state.copyWith(viewState: DealsViewState.loading));
-    
-    try {
-      final deals = await _dealRepository.getDeals();
-      final filteredDeals = _applyFiltersAndSort(
-        deals, 
-        _state.searchQuery, 
-        _state.selectedStatusFilter,
-        _state.sortBy,
-      );
-      
-      _updateState(_state.copyWith(
-        viewState: DealsViewState.loaded,
-        deals: deals,
-        filteredDeals: filteredDeals,
-        errorMessage: '',
-      ));
-    } catch (e) {
-      _updateState(_state.copyWith(
-        viewState: DealsViewState.error,
-        errorMessage: e.toString(),
-      ));
-    }
-  }
-
   Future<bool> createDeal(Deal deal) async {
     try {
       await _dealRepository.createDeal(deal);

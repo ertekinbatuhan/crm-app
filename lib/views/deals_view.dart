@@ -55,7 +55,9 @@ class DealsViewWidgetState extends State<DealsView> {
     if (viewModel.hasError) {
       return DealsErrorState(
         message: viewModel.errorMessage,
-        onRetry: () => viewModel.loadDeals(),
+        onRetry: () {
+          // Stream will automatically retry on error
+        },
       );
     }
 

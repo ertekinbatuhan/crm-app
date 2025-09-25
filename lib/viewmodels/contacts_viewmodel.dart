@@ -90,26 +90,6 @@ class ContactsViewModel extends ChangeNotifier with ViewStateMixin {
     notifyListeners();
   }
 
-  Future<void> loadContacts() async {
-    setLoading();
-    notifyListeners();
-    
-    try {
-      final contacts = await _contactRepository.getContacts();
-      _allContacts = contacts;
-      _applyFilters();
-      
-      if (_allContacts.isEmpty) {
-        setEmpty();
-      } else {
-        setSuccess();
-      }
-    } catch (e) {
-      setError(e.toString());
-    }
-    notifyListeners();
-  }
-
   Future<bool> createContact(Contact contact) async {
     try {
       await _contactRepository.createContact(contact);
