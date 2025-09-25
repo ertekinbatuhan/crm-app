@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
 
-class ContactsLoadingState extends StatelessWidget {
-  final String? message;
-
-  const ContactsLoadingState({
+class DealsLoadingState extends StatelessWidget {
+  final String message;
+  
+  const DealsLoadingState({
     super.key,
-    this.message,
+    this.message = 'Loading deals...',
   });
 
   @override
@@ -18,13 +18,11 @@ class ContactsLoadingState extends StatelessWidget {
           const CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
           ),
-          if (message != null) ...[
-            const SizedBox(height: AppSizes.paddingM),
-            Text(
-              message!,
-              style: AppTextStyles.errorMessage.copyWith(color: AppColors.grey600),
-            ),
-          ],
+          const SizedBox(height: AppSizes.paddingM),
+          Text(
+            message,
+            style: AppTextStyles.emptyStateSubtitle,
+          ),
         ],
       ),
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/stat_model.dart';
 import '../models/pipeline_model.dart';
 import '../models/notification_model.dart';
-import '../core/components/navigation/app_header.dart';
 import '../core/components/dashboard/dashboard_content.dart';
 import '../core/components/navigation/custom_bottom_navigation.dart';
 import 'tasks_view.dart';
@@ -20,6 +19,7 @@ class DashboardView extends StatefulWidget {
 class _DashboardViewState extends State<DashboardView> {
   int selectedNavIndex = 0;
   final GlobalKey<ContactsViewWidgetState> _contactsKey = GlobalKey();
+  final GlobalKey<DealsViewWidgetState> _dealsKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class _DashboardViewState extends State<DashboardView> {
               children: [
                 _buildHomeView(),
                 ContactsView(key: _contactsKey),
-                const DealsView(),
+                DealsView(key: _dealsKey),
                 const TasksView(),
                 const ReportsView(),
               ],
@@ -56,7 +56,7 @@ class _DashboardViewState extends State<DashboardView> {
   PreferredSizeWidget _buildAppBar() {
     final titles = ['Dashboard', 'Contacts', 'Deals', 'Tasks', 'Reports'];
 
-
+    // Contacts AppBar with green FAB
     if (selectedNavIndex == 1) {
       return AppBar(
         backgroundColor: Colors.white,
@@ -74,7 +74,6 @@ class _DashboardViewState extends State<DashboardView> {
         actions: [
           IconButton(
             onPressed: () {
-
               if (_contactsKey.currentState != null) {
                 _contactsKey.currentState!.showAddContactDialog();
               }
@@ -90,13 +89,52 @@ class _DashboardViewState extends State<DashboardView> {
       );
     }
 
+    // Deals AppBar with orange FAB
+    if (selectedNavIndex == 2) {
+      return AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text(
+          titles[selectedNavIndex],
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              if (_dealsKey.currentState != null) {
+                _dealsKey.currentState!.showAddDealDialog();
+              }
+            },
+            icon: const Icon(Icons.add),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9500),
+              foregroundColor: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      );
+    }
 
-    return AppHeader.withSettings(
-      title: titles[selectedNavIndex],
-      onSettingsPressed: () {
-
-        print('Settings pressed');
-      },
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      automaticallyImplyLeading: false,
+      centerTitle: true,
+      title: Text(
+        titles[selectedNavIndex],
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 

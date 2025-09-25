@@ -5,8 +5,10 @@ import '../models/contact_model.dart';
 import '../core/components/contacts/contact_search_bar.dart';
 import '../core/components/contacts/contact_stats_card.dart';
 import '../core/components/contacts/contacts_list.dart';
-import '../core/components/contacts/contacts_loading_state.dart';
-import '../core/components/contacts/contacts_error_state.dart';
+import '../core/components/view_state_handler.dart';
+import '../core/components/modal/add_contact_modal.dart';
+import '../core/components/modal/delete_contact_dialog.dart';
+import '../core/constants/app_constants.dart';
 
 class ContactsView extends StatefulWidget {
   const ContactsView({super.key});
@@ -18,7 +20,10 @@ class ContactsView extends StatefulWidget {
 class ContactsViewWidgetState extends State<ContactsView> {
   void showAddContactDialog() {
     final viewModel = context.read<ContactsViewModel>();
-    _showContactDialog(viewModel);
+    showDialog(
+      context: context,
+      builder: (context) => AddContactModal(viewModel: viewModel),
+    );
   }
 
   @override
@@ -31,7 +36,19 @@ class ContactsViewWidgetState extends State<ContactsView> {
               onChanged: viewModel.updateSearchQuery,
             ),
             Expanded(
-              child: _buildContent(viewModel),
+              child: ListViewStateHandler<Contact>(
+                state: viewModel.currentState,
+                items: viewModel.contacts,
+                loadingMessage: AppStrings.loadingContacts,
+                emptyTitle: AppStrings.noContactsFound,
+                emptySubtitle: AppStrings.startByAddingContact,
+                emptyIcon: Icons.people_outline,
+                emptyActionLabel: AppStrings.addContact,
+                onEmptyAction: showAddContactDialog,
+                errorMessage: viewModel.errorMessage,
+                onRetry: () => viewModel.loadContacts(),
+                listBuilder: (contacts) => _buildSuccessContent(viewModel, contacts),
+              ),
             ),
           ],
         );
@@ -39,33 +56,20 @@ class ContactsViewWidgetState extends State<ContactsView> {
     );
   }
 
-  Widget _buildContent(ContactsViewModel viewModel) {
-    if (viewModel.isLoading) {
-      return const ContactsLoadingState(
-        message: 'Loading contacts...',
-      );
-    }
-
-    if (viewModel.hasError) {
-      return ContactsErrorState(
-        message: viewModel.errorMessage,
-        onRetry: () => viewModel.loadContacts(),
-      );
-    }
-
+  Widget _buildSuccessContent(ContactsViewModel viewModel, List<Contact> contacts) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ContactStatsCard(
-            title: 'Total Contacts',
+            title: AppStrings.totalContacts,
             value: '${viewModel.totalContactsCount}',
             icon: Icons.people,
           ),
           const SizedBox(height: 24),
           ContactsList(
-            contacts: viewModel.contacts,
+            contacts: contacts,
             onEditContact: (contact) => _showEditContactDialog(viewModel, contact),
             onDeleteContact: (contact) => _showDeleteConfirmationDialog(viewModel, contact),
             onAddContact: showAddContactDialog,
@@ -75,241 +79,22 @@ class ContactsViewWidgetState extends State<ContactsView> {
     );
   }
 
-
-  void _showContactDialog(ContactsViewModel viewModel, [Contact? existingContact]) {
-    final nameController = TextEditingController(text: existingContact?.name ?? '');
-    final emailController = TextEditingController(text: existingContact?.email ?? '');
-    final phoneController = TextEditingController(text: existingContact?.phone ?? '');
-    final companyController = TextEditingController(text: existingContact?.company ?? '');
-
-    final isEditing = existingContact != null;
-
+  void _showEditContactDialog(ContactsViewModel viewModel, Contact contact) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                isEditing ? 'Edit Contact' : 'Add New Contact',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildContactForm(
-                nameController,
-                emailController,
-                phoneController,
-                companyController,
-              ),
-              const SizedBox(height: 32),
-              _buildDialogActions(
-                viewModel,
-                existingContact,
-                nameController,
-                emailController,
-                phoneController,
-                companyController,
-              ),
-            ],
-          ),
-        ),
+      builder: (context) => AddContactModal(
+        viewModel: viewModel,
+        existingContact: contact,
       ),
     );
-  }
-
-  Widget _buildContactForm(
-    TextEditingController nameController,
-    TextEditingController emailController,
-    TextEditingController phoneController,
-    TextEditingController companyController,
-  ) {
-    return Column(
-      children: [
-        TextField(
-          controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Name *',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: phoneController,
-          keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            labelText: 'Phone',
-            hintText: '+90 5XX XXX XX XX',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.phone),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: companyController,
-          decoration: const InputDecoration(
-            labelText: 'Company',
-            border: OutlineInputBorder(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDialogActions(
-    ContactsViewModel viewModel,
-    Contact? existingContact,
-    TextEditingController nameController,
-    TextEditingController emailController,
-    TextEditingController phoneController,
-    TextEditingController companyController,
-  ) {
-    final isEditing = existingContact != null;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.grey[600],
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-          child: const Text('Cancel', style: TextStyle(fontSize: 16)),
-        ),
-        const SizedBox(width: 16),
-        ElevatedButton(
-          onPressed: () => _handleContactSubmit(
-            viewModel,
-            existingContact,
-            nameController,
-            emailController,
-            phoneController,
-            companyController,
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF34C759),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Text(
-            isEditing ? 'Update' : 'Add',
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _handleContactSubmit(
-    ContactsViewModel viewModel,
-    Contact? existingContact,
-    TextEditingController nameController,
-    TextEditingController emailController,
-    TextEditingController phoneController,
-    TextEditingController companyController,
-  ) async {
-    if (nameController.text.trim().isEmpty) {
-      return;
-    }
-
-    final contact = existingContact?.copyWith(
-      name: nameController.text.trim(),
-      email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
-      phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-      company: companyController.text.trim().isEmpty ? null : companyController.text.trim(),
-    ) ?? Contact(
-      id: '',
-      name: nameController.text.trim(),
-      email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
-      phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-      company: companyController.text.trim().isEmpty ? null : companyController.text.trim(),
-    );
-
-    final success = existingContact != null
-        ? await viewModel.updateContact(contact)
-        : await viewModel.createContact(contact);
-
-    if (success && mounted) {
-      Navigator.pop(context);
-      // Real-time stream will automatically update the UI
-    }
-  }
-
-  void _showEditContactDialog(ContactsViewModel viewModel, Contact contact) {
-    _showContactDialog(viewModel, contact);
   }
 
   void _showDeleteConfirmationDialog(ContactsViewModel viewModel, Contact contact) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
-          'Delete Contact',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete "${contact.name}"? This action cannot be undone.',
-          style: const TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey[600],
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            child: const Text('Cancel', style: TextStyle(fontSize: 16)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await viewModel.deleteContact(contact.id);
-              // Real-time stream will automatically update the UI
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Delete', style: TextStyle(fontSize: 16)),
-          ),
-        ],
+      builder: (context) => DeleteContactDialog(
+        viewModel: viewModel,
+        contact: contact,
       ),
     );
   }

@@ -14,7 +14,6 @@ abstract class ContactRepository {
   bool get hasCache;
 }
 
-
 class Result<T> {
   final T? data;
   final String? error;
@@ -70,10 +69,7 @@ class ContactRepositoryImpl implements ContactRepository {
 
   @override
   Stream<List<Contact>> getContactsStream() {
-    // For real-time updates, we don't want to use cache
-    // Always get fresh data from the service
     return _contactService.getContactsStream().map((contacts) {
-      // Update cache when we receive new data
       _cachedContacts = contacts;
       _lastCacheTime = DateTime.now();
       return contacts;
@@ -83,38 +79,21 @@ class ContactRepositoryImpl implements ContactRepository {
   @override
   Future<Contact> createContact(Contact contact) async {
     final newContact = await _contactService.createContact(contact);
-    
-
-    if (_cachedContacts != null) {
-      _cachedContacts!.add(newContact);
-    }
-    
+    clearCache();
     return newContact;
   }
 
   @override
   Future<Contact> updateContact(Contact contact) async {
     final updatedContact = await _contactService.updateContact(contact);
-    
-
-    if (_cachedContacts != null) {
-      final index = _cachedContacts!.indexWhere((c) => c.id == contact.id);
-      if (index != -1) {
-        _cachedContacts![index] = updatedContact;
-      }
-    }
-    
+    clearCache();
     return updatedContact;
   }
 
   @override
   Future<void> deleteContact(String contactId) async {
     await _contactService.deleteContact(contactId);
-    
-
-    if (_cachedContacts != null) {
-      _cachedContacts!.removeWhere((contact) => contact.id == contactId);
-    }
+    clearCache();
   }
 
   @override
