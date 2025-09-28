@@ -16,7 +16,6 @@ class CustomBottomNavigation extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
     final safeAreaBottom = mediaQuery.padding.bottom;
 
-
     final verticalPadding = screenHeight > 800 ? 16.0 : 12.0;
     final horizontalPadding = mediaQuery.size.width * 0.04;
 
@@ -48,7 +47,7 @@ class CustomBottomNavigation extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(Icons.home, 'Home', 0),
+            _buildNavItem(Icons.dashboard, 'Dashboard', 0),
             _buildNavItem(Icons.contacts, 'Contacts', 1),
             _buildNavItem(Icons.handshake, 'Deals', 2),
             _buildNavItem(Icons.task_alt, 'Tasks', 3),

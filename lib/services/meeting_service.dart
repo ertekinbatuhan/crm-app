@@ -1,75 +1,135 @@
 import '../models/meeting_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class MeetingService {
-  Future<List<Meeting>> getMeetings();
+  Stream<List<Meeting>> getMeetingsStream();
+  Future<List<Meeting>> getMeetingsOnce();
   Future<List<Meeting>> getMeetingsByDate(DateTime date);
   Future<Meeting> createMeeting(Meeting meeting);
   Future<Meeting> updateMeeting(Meeting meeting);
   Future<void> deleteMeeting(String meetingId);
 }
 
-class MeetingServiceImpl implements MeetingService {
-  final List<Meeting> _meetings = [
-    Meeting(
-      id: '1',
-      title: 'Client meeting with Sarah',
-      startTime: DateTime.now().copyWith(hour: 14, minute: 0),
-      endTime: DateTime.now().copyWith(hour: 15, minute: 0),
-      type: MeetingType.client,
-      participants: ['Sarah Johnson'],
-      description: 'Discuss project requirements and timeline',
-    ),
-    Meeting(
-      id: '2',
-      title: 'Team standup',
-      startTime: DateTime.now().copyWith(hour: 9, minute: 30),
-      endTime: DateTime.now().copyWith(hour: 10, minute: 0),
-      type: MeetingType.internal,
-      participants: ['Development Team'],
-      description: 'Daily team standup meeting',
-    ),
-  ];
+class FirebaseMeetingService implements MeetingService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _collection = 'meetings';
 
   @override
-  Future<List<Meeting>> getMeetings() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return List.from(_meetings);
+  Stream<List<Meeting>> getMeetingsStream() {
+    try {
+      return _firestore
+          .collection(_collection)
+          .orderBy('startTime', descending: false)
+          .snapshots()
+          .map(
+            (snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              data['id'] = doc.id;
+              return Meeting.fromMap(data);
+            }).toList(),
+          );
+    } catch (e) {
+      throw Exception('Failed to stream meetings: $e');
+    }
+  }
+
+  @override
+  Future<List<Meeting>> getMeetingsOnce() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .orderBy('startTime', descending: false)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return Meeting.fromMap(data);
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch meetings: $e');
+    }
   }
 
   @override
   Future<List<Meeting>> getMeetingsByDate(DateTime date) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _meetings.where((meeting) {
-      return meeting.startTime.year == date.year &&
-          meeting.startTime.month == date.month &&
-          meeting.startTime.day == date.day;
-    }).toList();
+    try {
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where(
+            'startTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
+          .where('startTime', isLessThan: Timestamp.fromDate(endOfDay))
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return Meeting.fromMap(data);
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch meetings by date: $e');
+    }
   }
 
   @override
   Future<Meeting> createMeeting(Meeting meeting) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final newMeeting = meeting.copyWith(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-    );
-    _meetings.add(newMeeting);
-    return newMeeting;
+    try {
+      final meetingId = const Uuid().v4();
+      final now = DateTime.now();
+      final meetingWithMeta = meeting.copyWith(
+        id: meetingId,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final meetingData = meetingWithMeta.toMap();
+      meetingData.remove('id');
+
+      await _firestore.collection(_collection).doc(meetingId).set(meetingData);
+
+      return meetingWithMeta;
+    } catch (e) {
+      throw Exception('Failed to create meeting: $e');
+    }
   }
 
   @override
   Future<Meeting> updateMeeting(Meeting meeting) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final index = _meetings.indexWhere((m) => m.id == meeting.id);
-    if (index != -1) {
-      _meetings[index] = meeting;
-      return meeting;
+    try {
+      if (meeting.id.isEmpty) {
+        throw Exception('Meeting ID cannot be empty');
+      }
+
+      final updatedMeeting = meeting.copyWith(updatedAt: DateTime.now());
+      final meetingData = updatedMeeting.toMap();
+      meetingData.remove('id');
+
+      await _firestore
+          .collection(_collection)
+          .doc(meeting.id)
+          .update(meetingData);
+
+      return updatedMeeting;
+    } catch (e) {
+      throw Exception('Failed to update meeting: $e');
     }
-    throw Exception('Meeting not found');
   }
 
   @override
   Future<void> deleteMeeting(String meetingId) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _meetings.removeWhere((meeting) => meeting.id == meetingId);
+    try {
+      if (meetingId.isEmpty) {
+        throw Exception('Meeting ID cannot be empty');
+      }
+
+      await _firestore.collection(_collection).doc(meetingId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete meeting: $e');
+    }
   }
 }

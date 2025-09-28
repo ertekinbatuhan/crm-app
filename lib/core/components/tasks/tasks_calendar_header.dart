@@ -61,7 +61,7 @@ class TasksCalendarHeader extends StatelessWidget {
           CustomCalendarWidget(
             selectedDate: viewModel.selectedDate,
             focusedDate: viewModel.currentMonth,
-            eventDates: viewModel.tasks
+            eventDates: viewModel.allTasks
                 .where((task) => task.dueDate != null)
                 .map((task) => task.dueDate!)
                 .toList(),

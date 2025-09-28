@@ -51,7 +51,9 @@ class CustomTextField extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(AppSizes.radiusS)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(AppSizes.radiusS)),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(AppSizes.radiusS),
+          ),
           borderSide: BorderSide(color: AppColors.grey600.withOpacity(0.3)),
         ),
         focusedBorder: const OutlineInputBorder(
@@ -79,11 +81,7 @@ class NameTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
 
-  const NameTextField({
-    super.key,
-    this.controller,
-    this.validator,
-  });
+  const NameTextField({super.key, this.controller, this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +92,7 @@ class NameTextField extends StatelessWidget {
       validator: validator,
       keyboardType: TextInputType.name,
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZğüşıöçĞÜŞIÖÇ\s]')),
+        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
         LengthLimitingTextInputFormatter(50),
       ],
     );
@@ -105,11 +103,7 @@ class EmailTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
 
-  const EmailTextField({
-    super.key,
-    this.controller,
-    this.validator,
-  });
+  const EmailTextField({super.key, this.controller, this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -131,11 +125,7 @@ class PhoneTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
 
-  const PhoneTextField({
-    super.key,
-    this.controller,
-    this.validator,
-  });
+  const PhoneTextField({super.key, this.controller, this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -158,11 +148,7 @@ class CompanyTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
 
-  const CompanyTextField({
-    super.key,
-    this.controller,
-    this.validator,
-  });
+  const CompanyTextField({super.key, this.controller, this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -171,9 +157,7 @@ class CompanyTextField extends StatelessWidget {
       controller: controller,
       validator: validator,
       keyboardType: TextInputType.text,
-      inputFormatters: [
-        LengthLimitingTextInputFormatter(100),
-      ],
+      inputFormatters: [LengthLimitingTextInputFormatter(100)],
       prefixIcon: const Icon(Icons.business_outlined),
     );
   }

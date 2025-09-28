@@ -3,7 +3,7 @@ class NotificationModel {
   final String subtitle;
   final String avatar;
 
-  NotificationModel({
+  const NotificationModel({
     required this.title,
     required this.subtitle,
     required this.avatar,

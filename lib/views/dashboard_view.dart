@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/stat_model.dart';
 import '../models/pipeline_model.dart';
 import '../models/notification_model.dart';
@@ -8,6 +9,7 @@ import 'tasks_view.dart';
 import 'contacts_view.dart';
 import 'deals_view.dart';
 import 'reports_view.dart';
+import '../viewmodels/dashboard_viewmodel.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -20,6 +22,15 @@ class _DashboardViewState extends State<DashboardView> {
   int selectedNavIndex = 0;
   final GlobalKey<ContactsViewWidgetState> _contactsKey = GlobalKey();
   final GlobalKey<DealsViewWidgetState> _dealsKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<DashboardViewModel>().loadDashboardData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,42 +150,41 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildHomeView() {
-    return DashboardContent(
-      stats: [
-        StatModel(
-          title: 'Leads',
-          value: '120',
-          change: '+10%',
-          isPositive: true,
-        ),
-        StatModel(
-          title: 'Deals',
-          value: '45',
-          change: '+5%',
-          isPositive: false,
-        ),
-      ],
-      totalAmount: '\$250K',
-      period: 'Current Quarter',
-      pipelineStages: [
-        PipelineStage(name: 'Prospecting', progress: 0.8),
-        PipelineStage(name: 'Qualification', progress: 0.6),
-        PipelineStage(name: 'Proposal', progress: 0.4),
-        PipelineStage(name: 'Negotiation', progress: 0.2),
-        PipelineStage(name: 'Closed', progress: 0.1),
-      ],
-      notifications: [
-        NotificationModel(
-          title: 'Ethan Carter',
-          subtitle: 'New lead from website',
-          avatar: 'E',
-        ),
-        NotificationModel(
-          title: 'Project Phoenix',
-          subtitle: 'Deal in negotiation stage',
-          avatar: 'P',
-        ),
-      ],
+    return Consumer<DashboardViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (viewModel.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 12),
+                Text(
+                  viewModel.errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => viewModel.loadDashboardData(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return DashboardContent(
+          stats: viewModel.dashboardStats,
+          totalAmount: viewModel.totalRevenueFormatted,
+          period: viewModel.selectedPeriodLabel,
+          pipelineStages: viewModel.pipelineStages,
+          notifications: viewModel.recentNotifications,
+        );
+      },
     );
   }
 }

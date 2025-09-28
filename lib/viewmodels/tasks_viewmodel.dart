@@ -1,20 +1,33 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/task_model.dart';
 import '../models/meeting_model.dart';
+import '../models/contact_model.dart';
+import '../models/deal_model.dart';
 import '../services/task_service.dart';
 import '../services/meeting_service.dart';
+import '../services/contact_service.dart';
+import '../services/deal_service.dart';
 
 enum TasksViewState { initial, loading, loaded, error }
 
 class TasksViewModel extends ChangeNotifier {
   final TaskService _taskService;
   final MeetingService _meetingService;
+  final ContactService _contactService;
+  final DealService _dealService;
+
+  StreamSubscription<List<Task>>? _tasksSubscription;
 
   TasksViewModel({
     required TaskService taskService,
     required MeetingService meetingService,
+    required ContactService contactService,
+    required DealService dealService,
   }) : _taskService = taskService,
-       _meetingService = meetingService;
+       _meetingService = meetingService,
+       _contactService = contactService,
+       _dealService = dealService;
 
   // Private fields
   TasksViewState _state = TasksViewState.initial;
@@ -22,6 +35,8 @@ class TasksViewModel extends ChangeNotifier {
   List<Task> _filteredTasks = [];
   List<Meeting> _meetings = [];
   List<Meeting> _todayMeetings = [];
+  List<Contact> _contacts = [];
+  List<Deal> _deals = [];
   DateTime _selectedDate = DateTime.now();
   DateTime _currentMonth = DateTime.now();
   String _errorMessage = '';
@@ -33,6 +48,8 @@ class TasksViewModel extends ChangeNotifier {
   List<Task> get allTasks => _tasks;
   List<Meeting> get meetings => _meetings;
   List<Meeting> get todayMeetings => _todayMeetings;
+  List<Contact> get contacts => _contacts;
+  List<Deal> get deals => _deals;
   DateTime get selectedDate => _selectedDate;
   DateTime get currentMonth => _currentMonth;
   String get errorMessage => _errorMessage;
@@ -44,12 +61,38 @@ class TasksViewModel extends ChangeNotifier {
   // Public methods
   Future<void> loadTasksData() async {
     _setState(TasksViewState.loading);
+    await _tasksSubscription?.cancel();
     try {
-      _tasks = [];
-      _meetings = [];
+      final results = await Future.wait([
+        _taskService.getTasksStream().first,
+        _meetingService.getMeetingsStream().first,
+        _contactService.getContactsStream().first,
+        _dealService.getDealsStream().first,
+      ]);
+
+      _tasks = (results[0] as List<Task>)..sort(_sortByDueDate);
+      _meetings = results[1] as List<Meeting>;
+      _contacts = results[2] as List<Contact>;
+      _deals = results[3] as List<Deal>;
+
       _applyFilters();
       _loadTodayMeetings();
       _setState(TasksViewState.loaded);
+
+      _tasksSubscription = _taskService.getTasksStream().listen(
+        (tasks) {
+          _tasks = [...tasks]..sort(_sortByDueDate);
+          _applyFilters();
+          _loadTodayMeetings();
+          if (_state != TasksViewState.loaded) {
+            _state = TasksViewState.loaded;
+          }
+          notifyListeners();
+        },
+        onError: (error) {
+          _setError(error.toString());
+        },
+      );
     } catch (e) {
       _setError(e.toString());
     }
@@ -57,29 +100,39 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> createTask(Task task) async {
     try {
-      _tasks.add(task);
+      final createdTask = await _taskService.createTask(task);
+      _tasks = [..._tasks, createdTask]..sort(_sortByDueDate);
       _applyFilters();
       notifyListeners();
+      return;
     } catch (e) {
       _setError(e.toString());
+      rethrow;
     }
   }
 
   Future<void> updateTask(Task task) async {
     try {
-      final index = _tasks.indexWhere((t) => t.id == task.id);
+      final updatedTask = await _taskService.updateTask(task);
+      final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
       if (index != -1) {
-        _tasks[index] = task;
-        _applyFilters();
-        notifyListeners();
+        _tasks[index] = updatedTask;
+        _tasks.sort(_sortByDueDate);
+      } else {
+        _tasks = [..._tasks, updatedTask];
+        _tasks.sort(_sortByDueDate);
       }
+      _applyFilters();
+      notifyListeners();
     } catch (e) {
       _setError(e.toString());
+      rethrow;
     }
   }
 
   Future<void> deleteTask(String taskId) async {
     try {
+      await _taskService.deleteTask(taskId);
       _tasks.removeWhere((task) => task.id == taskId);
       _applyFilters();
       notifyListeners();
@@ -90,14 +143,17 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> toggleTaskCompletion(String taskId) async {
     try {
-      final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+      final updatedTask = await _taskService.toggleTaskCompletion(taskId);
+      final taskIndex = _tasks.indexWhere((task) => task.id == updatedTask.id);
       if (taskIndex != -1) {
-        final task = _tasks[taskIndex];
-        final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
-        await updateTask(updatedTask);
+        _tasks[taskIndex] = updatedTask;
+        _tasks.sort(_sortByDueDate);
       }
+      _applyFilters();
+      notifyListeners();
     } catch (e) {
       _setError(e.toString());
+      rethrow;
     }
   }
 
@@ -167,6 +223,15 @@ class TasksViewModel extends ChangeNotifier {
               meeting.startTime.day == today.day,
         )
         .toList();
+  }
+
+  int _sortByDueDate(Task a, Task b) {
+    if (a.dueDate == null && b.dueDate == null) {
+      return a.title.compareTo(b.title);
+    }
+    if (a.dueDate == null) return 1;
+    if (b.dueDate == null) return -1;
+    return a.dueDate!.compareTo(b.dueDate!);
   }
 
   // Month navigation methods
@@ -249,6 +314,7 @@ class TasksViewModel extends ChangeNotifier {
     ];
     return '${monthNames[_currentMonth.month - 1]} ${_currentMonth.year}';
   }
+
   String get selectedDateString {
     const monthNames = [
       'January',
@@ -358,5 +424,11 @@ class TasksViewModel extends ChangeNotifier {
 
   int get completedTasksToday {
     return selectedDateTasks.where((task) => task.isCompleted).length;
+  }
+
+  @override
+  void dispose() {
+    _tasksSubscription?.cancel();
+    super.dispose();
   }
 }

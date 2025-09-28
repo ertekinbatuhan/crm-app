@@ -4,6 +4,7 @@ import '../models/deal_model.dart';
 
 abstract class DealService {
   Stream<List<Deal>> getDealsStream();
+  Future<List<Deal>> getDealsOnce();
   Future<Deal> createDeal(Deal deal);
   Future<Deal> updateDeal(Deal deal);
   Future<void> deleteDeal(String dealId);
@@ -33,24 +34,44 @@ class FirebaseDealService implements DealService {
   }
 
   @override
+  Future<List<Deal>> getDealsOnce() async {
+    try {
+      final snapshot = await _firestore
+          .collection(_collection)
+          .orderBy('title')
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Deal.fromMap(data);
+      }).toList();
+    } catch (e) {
+      throw Exception('Error fetching deals: $e');
+    }
+  }
+
+  @override
   Future<Deal> createDeal(Deal deal) async {
     try {
       final dealId = const Uuid().v4();
+      final now = DateTime.now();
 
-      // Create deal with automatic closeDate based on status
       final dealWithId = Deal.withAutoCloseDate(
         id: dealId,
         title: deal.title,
         value: deal.value,
         description: deal.description,
         status: deal.status,
+        createdAt: now,
+        updatedAt: now,
       );
-      
+
       await _firestore
           .collection(_collection)
           .doc(dealId)
           .set(dealWithId.toMap());
-      
+
       return dealWithId;
     } catch (e) {
       throw Exception('Error creating deal: $e');
@@ -63,31 +84,29 @@ class FirebaseDealService implements DealService {
       if (deal.id.isEmpty) {
         throw Exception('Deal ID cannot be empty');
       }
-      
-      // Get the current deal to check if status changed
+
       final currentDoc = await _firestore
           .collection(_collection)
           .doc(deal.id)
           .get();
-      
+
       Deal updatedDeal = deal;
-      
-      // If status changed, update closeDate automatically
+
       if (currentDoc.exists) {
         final currentDeal = Deal.fromMap(currentDoc.data()!);
         if (currentDeal.status != deal.status) {
           updatedDeal = deal.updateWithAutoCloseDate(deal.status);
         }
+        updatedDeal = updatedDeal.copyWith(createdAt: currentDeal.createdAt);
       }
-      
+
+      updatedDeal = updatedDeal.copyWith(updatedAt: DateTime.now());
+
       final dealData = updatedDeal.toMap();
-      dealData.remove('id'); 
-      
-      await _firestore
-          .collection(_collection)
-          .doc(deal.id)
-          .update(dealData);
-      
+      dealData.remove('id');
+
+      await _firestore.collection(_collection).doc(deal.id).update(dealData);
+
       return updatedDeal;
     } catch (e) {
       throw Exception('Error updating deal: $e');
@@ -100,11 +119,8 @@ class FirebaseDealService implements DealService {
       if (dealId.isEmpty) {
         throw Exception('Deal ID cannot be empty');
       }
-      
-      await _firestore
-          .collection(_collection)
-          .doc(dealId)
-          .delete();
+
+      await _firestore.collection(_collection).doc(dealId).delete();
     } catch (e) {
       throw Exception('Error deleting deal: $e');
     }

@@ -3,8 +3,13 @@ import '../../../models/notification_model.dart';
 
 class NotificationCard extends StatelessWidget {
   final List<NotificationModel> notifications;
+  final String title;
 
-  const NotificationCard({super.key, required this.notifications});
+  const NotificationCard({
+    super.key,
+    required this.notifications,
+    this.title = 'Notifications',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,18 +30,33 @@ class NotificationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Notifications',
-            style: TextStyle(
+          Text(
+            title,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),
           const SizedBox(height: 16),
-          ...notifications
-              .map((notification) => _buildNotificationItem(notification))
-              .toList(),
+          if (notifications.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Text(
+                  'No recent activity',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            )
+          else
+            ...notifications
+                .map((notification) => _buildNotificationItem(notification))
+                .toList(),
         ],
       ),
     );

@@ -23,10 +23,10 @@ class ServiceLocator {
       () => FirebaseDealService(),
     );
     serviceLocator.registerLazySingleton<TaskService>(
-      () => TaskServiceImpl(),
+      () => FirebaseTaskService(),
     );
     serviceLocator.registerLazySingleton<MeetingService>(
-      () => MeetingServiceImpl(),
+      () => FirebaseMeetingService(),
     );
     
 
@@ -65,6 +65,8 @@ class ServiceLocator {
       () => TasksViewModel(
         taskService: serviceLocator.get<TaskService>(),
         meetingService: serviceLocator.get<MeetingService>(),
+        contactService: serviceLocator.get<ContactService>(),
+        dealService: serviceLocator.get<DealService>(),
       ),
     );
   }
