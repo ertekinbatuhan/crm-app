@@ -4,18 +4,21 @@ import '../viewmodels/tasks_viewmodel.dart';
 import '../core/components/modal/add_task_modal.dart';
 import '../core/components/tasks/tasks_calendar_header.dart';
 import '../core/components/column/app_section.dart';
+import '../core/components/common/action_menu.dart';
+import '../core/components/common/danger_button.dart';
 import '../core/components/list-view/app_list_item.dart';
-import '../models/task_model.dart';
+import '../core/constants/app_constants.dart';
 import '../models/meeting_model.dart';
+import '../models/task_model.dart';
 
 class TasksView extends StatefulWidget {
   const TasksView({super.key});
 
   @override
-  State<TasksView> createState() => _TasksViewState();
+  TasksViewState createState() => TasksViewState();
 }
 
-class _TasksViewState extends State<TasksView>
+class TasksViewState extends State<TasksView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -63,11 +66,6 @@ class _TasksViewState extends State<TasksView>
         return Scaffold(
           backgroundColor: const Color(0xFFF8F9FA),
           body: SafeArea(child: _buildMainView(viewModel)),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddTaskDialog(),
-            backgroundColor: const Color(0xFF007AFF),
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
         );
       },
     );
@@ -92,7 +90,7 @@ class _TasksViewState extends State<TasksView>
             showEmptyState: true,
           ),
 
-          const SizedBox(height: 100), // Space for FAB
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -134,30 +132,8 @@ class _TasksViewState extends State<TasksView>
       subtitle: task.dueDate != null
           ? AppListItemSubtitle(text: _formatTime(task.dueDate!))
           : null,
-      trailing: PopupMenuButton<_TaskMenuAction>(
+      trailing: ActionMenu(
         onSelected: (action) => _handleTaskAction(action, task, viewModel),
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: _TaskMenuAction.edit,
-            child: ListTile(
-              leading: Icon(Icons.edit_outlined),
-              title: Text('Edit'),
-              minLeadingWidth: 0,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-          const PopupMenuItem(
-            value: _TaskMenuAction.delete,
-            child: ListTile(
-              leading: Icon(Icons.delete_outline, color: Colors.redAccent),
-              title: Text('Delete'),
-              minLeadingWidth: 0,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ],
-        tooltip: 'Task options',
-        icon: const Icon(Icons.more_vert, color: Colors.grey),
       ),
     );
   }
@@ -184,7 +160,7 @@ class _TasksViewState extends State<TasksView>
     return '${displayHour.toString().padLeft(1, '0')}:${minute.toString().padLeft(2, '0')} $period';
   }
 
-  void _showAddTaskDialog() async {
+  Future<void> showAddTaskDialog() async {
     if (!mounted) return;
 
     final viewModel = context.read<TasksViewModel>();
@@ -245,17 +221,16 @@ class _TasksViewState extends State<TasksView>
   }
 
   void _handleTaskAction(
-    _TaskMenuAction action,
+    ActionMenuAction action,
     Task task,
     TasksViewModel viewModel,
   ) {
-    switch (action) {
-      case _TaskMenuAction.edit:
-        _showEditTaskDialog(task, viewModel);
-        break;
-      case _TaskMenuAction.delete:
-        _confirmDeleteTask(task, viewModel);
-        break;
+    if (action == ActionMenuAction.edit) {
+      _showEditTaskDialog(task, viewModel);
+      return;
+    }
+    if (action == ActionMenuAction.delete) {
+      _confirmDeleteTask(task, viewModel);
     }
   }
 
@@ -269,14 +244,11 @@ class _TasksViewState extends State<TasksView>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: const Text(AppStrings.cancel),
             ),
-            ElevatedButton(
+            DangerButton(
+              label: AppStrings.delete,
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-              ),
-              child: const Text('Delete'),
             ),
           ],
         );
@@ -300,5 +272,3 @@ class _TasksViewState extends State<TasksView>
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
-
-enum _TaskMenuAction { edit, delete }

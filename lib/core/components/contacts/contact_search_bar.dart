@@ -1,35 +1,45 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_constants.dart';
+import '../base/base_input.dart';
 
-class ContactSearchBar extends StatelessWidget {
+class ContactSearchBar extends StatefulWidget {
   final String hintText;
   final ValueChanged<String>? onChanged;
-  final TextEditingController? controller;
 
   const ContactSearchBar({
     super.key,
-    this.hintText = 'Search contacts...',
+    this.hintText = AppStrings.searchContacts,
     this.onChanged,
-    this.controller,
   });
 
   @override
+  State<ContactSearchBar> createState() => _ContactSearchBarState();
+}
+
+class _ContactSearchBarState extends State<ContactSearchBar> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(AppSizes.paddingM),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusS),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: AppColors.searchBarBackgroundColor,
-        ),
+      child: SearchInputField(
+        controller: _controller,
+        hint: widget.hintText,
+        onChanged: widget.onChanged,
+        onClear: () => widget.onChanged?.call(''),
       ),
     );
   }

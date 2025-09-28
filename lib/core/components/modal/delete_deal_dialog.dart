@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/deal_model.dart';
 import '../../../viewmodels/deals_viewmodel.dart';
 import '../../constants/app_constants.dart';
+import '../common/danger_button.dart';
 
 class DeleteDealDialog extends StatelessWidget {
   final DealsViewModel viewModel;
@@ -22,10 +23,7 @@ class DeleteDealDialog extends StatelessWidget {
       ),
       title: Text(
         AppStrings.deleteDeal,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.black),
       ),
       content: Text(
         'Are you sure you want to delete "${deal.title}"? This action cannot be undone.',
@@ -41,32 +39,14 @@ class DeleteDealDialog extends StatelessWidget {
               vertical: AppSizes.paddingM,
             ),
           ),
-          child: Text(
-            AppStrings.cancel,
-            style: const TextStyle(fontSize: 16),
-          ),
+          child: Text(AppStrings.cancel, style: const TextStyle(fontSize: 16)),
         ),
-        ElevatedButton(
+        DangerButton(
+          label: AppStrings.delete,
           onPressed: () async {
             Navigator.pop(context);
             await viewModel.deleteDeal(deal.id);
-            // Real-time stream will automatically update the UI
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.red600,
-            foregroundColor: AppColors.white,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.paddingL,
-              vertical: AppSizes.paddingM,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSizes.radiusS),
-            ),
-          ),
-          child: Text(
-            AppStrings.delete,
-            style: const TextStyle(fontSize: 16),
-          ),
         ),
       ],
     );

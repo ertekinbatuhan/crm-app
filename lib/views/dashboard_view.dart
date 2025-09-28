@@ -22,6 +22,7 @@ class _DashboardViewState extends State<DashboardView> {
   int selectedNavIndex = 0;
   final GlobalKey<ContactsViewWidgetState> _contactsKey = GlobalKey();
   final GlobalKey<DealsViewWidgetState> _dealsKey = GlobalKey();
+  final GlobalKey<TasksViewState> _tasksKey = GlobalKey();
 
   @override
   void initState() {
@@ -46,7 +47,7 @@ class _DashboardViewState extends State<DashboardView> {
                 _buildHomeView(),
                 ContactsView(key: _contactsKey),
                 DealsView(key: _dealsKey),
-                const TasksView(),
+                TasksView(key: _tasksKey),
                 const ReportsView(),
               ],
             ),
@@ -100,7 +101,6 @@ class _DashboardViewState extends State<DashboardView> {
       );
     }
 
-    // Deals AppBar with orange FAB
     if (selectedNavIndex == 2) {
       return AppBar(
         backgroundColor: Colors.white,
@@ -125,6 +125,36 @@ class _DashboardViewState extends State<DashboardView> {
             icon: const Icon(Icons.add),
             style: IconButton.styleFrom(
               backgroundColor: const Color(0xFFFF9500),
+              foregroundColor: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      );
+    }
+
+    if (selectedNavIndex == 3) {
+      return AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text(
+          titles[selectedNavIndex],
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _tasksKey.currentState?.showAddTaskDialog();
+            },
+            icon: const Icon(Icons.add),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF007AFF),
               foregroundColor: Colors.white,
             ),
           ),

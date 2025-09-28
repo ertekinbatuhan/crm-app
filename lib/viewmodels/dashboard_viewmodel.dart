@@ -145,6 +145,10 @@ class DashboardViewModel extends ChangeNotifier {
   int get closedDealsCount =>
       _recentDeals.where((deal) => deal.status == DealStatus.closed).length;
 
+  double get closedDealsRevenue => _recentDeals
+      .where((deal) => deal.status == DealStatus.closed)
+      .fold(0.0, (sum, deal) => sum + deal.value);
+
   double get averageDealValue {
     if (_recentDeals.isEmpty) return 0.0;
     return totalDealValue / _recentDeals.length;
@@ -229,14 +233,20 @@ class DashboardViewModel extends ChangeNotifier {
       ),
       StatModel(
         title: 'Deals',
-        value: totalDealValue.toStringAsFixed(0),
+        value: '\$${totalDealValue.toStringAsFixed(0)}',
         changeLabel: '${closedDealsCount} closed',
         isPositive: pipelineProgress >= 0.5,
+      ),
+      StatModel(
+        title: 'Revenue',
+        value: '\$${closedDealsRevenue.toStringAsFixed(0)}',
+        changeLabel: '${closedDealsCount} closed deals',
+        isPositive: closedDealsCount > 0,
       ),
     ];
   }
 
-  String get totalRevenueFormatted => '  ${totalDealValue.toStringAsFixed(0)}';
+  String get totalRevenueFormatted => '\$${totalDealValue.toStringAsFixed(0)}';
 
   String get selectedPeriodLabel => 'Current Period';
 

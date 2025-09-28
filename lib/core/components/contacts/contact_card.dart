@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/contact_model.dart';
 import '../../constants/app_constants.dart';
+import '../common/action_menu.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -28,10 +29,7 @@ class ContactCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: _buildAvatar(),
-        title: Text(
-          contact.name,
-          style: AppTextStyles.cardTitle,
-        ),
+        title: Text(contact.name, style: AppTextStyles.cardTitle),
         subtitle: _buildSubtitle(),
         trailing: _buildPopupMenu(context),
       ),
@@ -50,7 +48,7 @@ class ContactCard extends StatelessWidget {
 
   Widget _buildSubtitle() {
     final List<Widget> subtitleItems = [];
-    
+
     if (contact.email != null) {
       subtitleItems.add(Text(contact.email!));
     }
@@ -68,40 +66,14 @@ class ContactCard extends StatelessWidget {
   }
 
   Widget _buildPopupMenu(BuildContext context) {
-    return PopupMenuButton(
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.radiusS),
-      ),
-      onSelected: (value) {
-        if (value == 'edit' && onEdit != null) {
+    return ActionMenu(
+      onSelected: (action) {
+        if (action == ActionMenuAction.edit && onEdit != null) {
           onEdit!();
-        } else if (value == 'delete' && onDelete != null) {
+        } else if (action == ActionMenuAction.delete && onDelete != null) {
           onDelete!();
         }
       },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: [
-              Icon(Icons.edit, size: AppSizes.iconM),
-              const SizedBox(width: AppSizes.paddingS),
-              const Text(AppStrings.edit),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete, size: AppSizes.iconM, color: AppColors.red),
-              const SizedBox(width: AppSizes.paddingS),
-              const Text(AppStrings.delete, style: TextStyle(color: AppColors.red)),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

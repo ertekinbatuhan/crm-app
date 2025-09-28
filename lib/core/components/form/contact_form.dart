@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../models/contact_model.dart';
+import '../../constants/app_constants.dart';
+import '../../utils/form_validators.dart';
+import '../base/base_input.dart';
 
 class ContactForm extends StatefulWidget {
   final Contact? existingContact;
@@ -26,10 +30,18 @@ class _ContactFormState extends State<ContactForm> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.existingContact?.name ?? '');
-    emailController = TextEditingController(text: widget.existingContact?.email ?? '');
-    phoneController = TextEditingController(text: widget.existingContact?.phone ?? '');
-    companyController = TextEditingController(text: widget.existingContact?.company ?? '');
+    nameController = TextEditingController(
+      text: widget.existingContact?.name ?? '',
+    );
+    emailController = TextEditingController(
+      text: widget.existingContact?.email ?? '',
+    );
+    phoneController = TextEditingController(
+      text: widget.existingContact?.phone ?? '',
+    );
+    companyController = TextEditingController(
+      text: widget.existingContact?.company ?? '',
+    );
   }
 
   @override
@@ -57,39 +69,37 @@ class _ContactFormState extends State<ContactForm> {
   Widget _buildFormFields() {
     return Column(
       children: [
-        TextField(
+        BaseInput(
+          label: AppStrings.nameRequired,
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Name *',
-            border: OutlineInputBorder(),
-          ),
+          validator: FormValidators.validateName,
+          textCapitalization: TextCapitalization.words,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+          ],
         ),
         const SizedBox(height: 16),
-        TextField(
+        BaseInput(
+          label: AppStrings.email,
           controller: emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            border: OutlineInputBorder(),
-          ),
+          keyboardType: TextInputType.emailAddress,
+          inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+          validator: FormValidators.validateEmail,
         ),
         const SizedBox(height: 16),
-        TextField(
+        BaseInput(
+          label: AppStrings.phone,
+          hint: AppStrings.phoneHint,
           controller: phoneController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            labelText: 'Phone',
-            hintText: '+90 5XX XXX XX XX',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.phone),
-          ),
+          validator: FormValidators.validatePhone,
+          prefixIcon: const Icon(Icons.phone_outlined),
         ),
         const SizedBox(height: 16),
-        TextField(
+        BaseInput(
+          label: AppStrings.company,
           controller: companyController,
-          decoration: const InputDecoration(
-            labelText: 'Company',
-            border: OutlineInputBorder(),
-          ),
+          validator: FormValidators.validateCompany,
         ),
       ],
     );
@@ -128,22 +138,42 @@ class _ContactFormState extends State<ContactForm> {
   }
 
   void _handleSubmit() {
-    if (nameController.text.trim().isEmpty) {
+    final nameError = FormValidators.validateName(nameController.text);
+    final emailError = FormValidators.validateEmail(emailController.text);
+    final phoneError = FormValidators.validatePhone(phoneController.text);
+    final companyError = FormValidators.validateCompany(companyController.text);
+
+    if (nameError != null) {
+      setState(() {});
       return;
     }
 
-    final contact = widget.existingContact?.copyWith(
-      name: nameController.text.trim(),
-      email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
-      phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-      company: companyController.text.trim().isEmpty ? null : companyController.text.trim(),
-    ) ?? Contact(
-      id: '',
-      name: nameController.text.trim(),
-      email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
-      phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-      company: companyController.text.trim().isEmpty ? null : companyController.text.trim(),
-    );
+    final contact =
+        widget.existingContact?.copyWith(
+          name: nameController.text.trim(),
+          email: emailController.text.trim().isEmpty
+              ? null
+              : emailController.text.trim(),
+          phone: phoneController.text.trim().isEmpty
+              ? null
+              : phoneController.text.trim(),
+          company: companyController.text.trim().isEmpty
+              ? null
+              : companyController.text.trim(),
+        ) ??
+        Contact(
+          id: '',
+          name: nameController.text.trim(),
+          email: emailController.text.trim().isEmpty
+              ? null
+              : emailController.text.trim(),
+          phone: phoneController.text.trim().isEmpty
+              ? null
+              : phoneController.text.trim(),
+          company: companyController.text.trim().isEmpty
+              ? null
+              : companyController.text.trim(),
+        );
 
     widget.onSubmit(contact);
   }

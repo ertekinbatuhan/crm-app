@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/deal_model.dart';
 import '../../constants/app_constants.dart';
+import '../common/action_menu.dart';
 import '../../utils/date_extensions.dart';
 import '../../utils/deal_extensions.dart';
 
@@ -9,7 +10,7 @@ class DealsList extends StatelessWidget {
   final Function(Deal) onEditDeal;
   final Function(Deal) onDeleteDeal;
   final VoidCallback onAddDeal;
-  
+
   const DealsList({
     super.key,
     required this.deals,
@@ -48,12 +49,16 @@ class DealsList extends StatelessWidget {
           const SizedBox(height: AppSizes.paddingM),
           Text(
             'No deals found',
-            style: AppTextStyles.emptyStateTitle.copyWith(color: AppColors.grey),
+            style: AppTextStyles.emptyStateTitle.copyWith(
+              color: AppColors.grey,
+            ),
           ),
           const SizedBox(height: AppSizes.paddingS),
           Text(
             'Start by adding your first deal',
-            style: AppTextStyles.emptyStateSubtitle.copyWith(color: AppColors.grey),
+            style: AppTextStyles.emptyStateSubtitle.copyWith(
+              color: AppColors.grey,
+            ),
           ),
           const SizedBox(height: AppSizes.paddingL),
           ElevatedButton.icon(
@@ -98,10 +103,7 @@ class DealsList extends StatelessWidget {
             size: AppSizes.iconM,
           ),
         ),
-        title: Text(
-          deal.title,
-          style: AppTextStyles.cardTitle,
-        ),
+        title: Text(deal.title, style: AppTextStyles.cardTitle),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -126,11 +128,7 @@ class DealsList extends StatelessWidget {
               const SizedBox(height: AppSizes.paddingXS),
               Row(
                 children: [
-                  Icon(
-                    Icons.schedule,
-                    size: 14,
-                    color: AppColors.grey600,
-                  ),
+                  Icon(Icons.schedule, size: 14, color: AppColors.grey600),
                   const SizedBox(width: 4),
                   Text(
                     'Close: ${deal.closeDate!.toUserFriendlyString()}',
@@ -156,47 +154,16 @@ class DealsList extends StatelessWidget {
             ],
           ],
         ),
-        trailing: PopupMenuTheme(
-          data: const PopupMenuThemeData(
-            color: AppColors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(AppSizes.radiusS)),
-            ),
-          ),
-          child: PopupMenuButton(
-            onSelected: (value) {
-              if (value == 'edit') {
-                onEditDeal(deal);
-              } else if (value == 'delete') {
-                onDeleteDeal(deal);
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, size: AppSizes.iconS),
-                    SizedBox(width: AppSizes.paddingS),
-                    Text(AppStrings.edit),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, size: AppSizes.iconS, color: AppColors.red),
-                    SizedBox(width: AppSizes.paddingS),
-                    Text(AppStrings.delete, style: TextStyle(color: AppColors.red)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        trailing: ActionMenu(
+          onSelected: (action) {
+            if (action == ActionMenuAction.edit) {
+              onEditDeal(deal);
+            } else if (action == ActionMenuAction.delete) {
+              onDeleteDeal(deal);
+            }
+          },
         ),
       ),
     );
   }
-
 }
