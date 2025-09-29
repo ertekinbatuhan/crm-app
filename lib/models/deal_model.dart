@@ -164,22 +164,3 @@ class Deal {
 }
 
 enum DealStatus { prospect, qualified, proposal, negotiation, closed, lost }
-
-extension DealStatusExtension on DealStatus {
-  String get displayName {
-    switch (this) {
-      case DealStatus.prospect:
-        return 'Prospect';
-      case DealStatus.qualified:
-        return 'Qualified';
-      case DealStatus.proposal:
-        return 'Proposal';
-      case DealStatus.negotiation:
-        return 'Negotiation';
-      case DealStatus.closed:
-        return 'Closed';
-      case DealStatus.lost:
-        return 'Lost';
-    }
-  }
-}

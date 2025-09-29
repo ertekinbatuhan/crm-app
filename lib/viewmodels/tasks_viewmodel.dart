@@ -62,6 +62,12 @@ class TasksViewModel extends ChangeNotifier {
   Future<void> loadTasksData() async {
     _setState(TasksViewState.loading);
     await _tasksSubscription?.cancel();
+    
+    // Reset to today's date when loading data
+    final today = DateTime.now();
+    _selectedDate = today;
+    _currentMonth = DateTime(today.year, today.month);
+    
     try {
       final results = await Future.wait([
         _taskService.getTasksStream().first,
@@ -100,11 +106,8 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> createTask(Task task) async {
     try {
-      final createdTask = await _taskService.createTask(task);
-      _tasks = [..._tasks, createdTask]..sort(_sortByDueDate);
-      _applyFilters();
-      notifyListeners();
-      return;
+      await _taskService.createTask(task);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
       rethrow;
@@ -113,17 +116,8 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> updateTask(Task task) async {
     try {
-      final updatedTask = await _taskService.updateTask(task);
-      final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
-      if (index != -1) {
-        _tasks[index] = updatedTask;
-        _tasks.sort(_sortByDueDate);
-      } else {
-        _tasks = [..._tasks, updatedTask];
-        _tasks.sort(_sortByDueDate);
-      }
-      _applyFilters();
-      notifyListeners();
+      await _taskService.updateTask(task);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
       rethrow;
@@ -133,9 +127,7 @@ class TasksViewModel extends ChangeNotifier {
   Future<void> deleteTask(String taskId) async {
     try {
       await _taskService.deleteTask(taskId);
-      _tasks.removeWhere((task) => task.id == taskId);
-      _applyFilters();
-      notifyListeners();
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
     }
@@ -143,14 +135,8 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> toggleTaskCompletion(String taskId) async {
     try {
-      final updatedTask = await _taskService.toggleTaskCompletion(taskId);
-      final taskIndex = _tasks.indexWhere((task) => task.id == updatedTask.id);
-      if (taskIndex != -1) {
-        _tasks[taskIndex] = updatedTask;
-        _tasks.sort(_sortByDueDate);
-      }
-      _applyFilters();
-      notifyListeners();
+      await _taskService.toggleTaskCompletion(taskId);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
       rethrow;

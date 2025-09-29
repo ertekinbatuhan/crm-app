@@ -1,5 +1,6 @@
 import '../../models/deal_model.dart';
 import '../../services/deal_service.dart';
+import '../utils/deal_extensions.dart';
 
 abstract class DealRepository {
   Stream<List<Deal>> getDealsStream();

@@ -22,6 +22,7 @@ class ContactForm extends StatefulWidget {
 }
 
 class _ContactFormState extends State<ContactForm> {
+  final _formKey = GlobalKey<FormState>();
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final TextEditingController phoneController;
@@ -57,12 +58,16 @@ class _ContactFormState extends State<ContactForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildFormFields(),
-        const SizedBox(height: 32),
-        _buildActions(),
-      ],
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildFormFields(),
+          const SizedBox(height: AppSizes.paddingL),
+          _buildActions(),
+        ],
+      ),
     );
   }
 
@@ -70,7 +75,7 @@ class _ContactFormState extends State<ContactForm> {
     return Column(
       children: [
         BaseInput(
-          label: AppStrings.nameRequired,
+          label: 'Name *',
           controller: nameController,
           validator: FormValidators.validateName,
           textCapitalization: TextCapitalization.words,
@@ -80,7 +85,7 @@ class _ContactFormState extends State<ContactForm> {
         ),
         const SizedBox(height: 16),
         BaseInput(
-          label: AppStrings.email,
+          label: 'Email',
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
           inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
@@ -88,8 +93,8 @@ class _ContactFormState extends State<ContactForm> {
         ),
         const SizedBox(height: 16),
         BaseInput(
-          label: AppStrings.phone,
-          hint: AppStrings.phoneHint,
+          label: 'Phone',
+          hint: 'Optional',
           controller: phoneController,
           keyboardType: TextInputType.phone,
           validator: FormValidators.validatePhone,
@@ -97,7 +102,7 @@ class _ContactFormState extends State<ContactForm> {
         ),
         const SizedBox(height: 16),
         BaseInput(
-          label: AppStrings.company,
+          label: 'Company',
           controller: companyController,
           validator: FormValidators.validateCompany,
         ),
@@ -138,13 +143,7 @@ class _ContactFormState extends State<ContactForm> {
   }
 
   void _handleSubmit() {
-    final nameError = FormValidators.validateName(nameController.text);
-    final emailError = FormValidators.validateEmail(emailController.text);
-    final phoneError = FormValidators.validatePhone(phoneController.text);
-    final companyError = FormValidators.validateCompany(companyController.text);
-
-    if (nameError != null) {
-      setState(() {});
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 

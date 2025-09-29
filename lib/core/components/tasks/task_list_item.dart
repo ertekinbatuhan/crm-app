@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
-import '../../../viewmodels/tasks_viewmodel.dart';
+import '../../../models/task_model.dart';
+import '../common/action_menu.dart';
+import '../list-view/app_list_item.dart';
 
 class TaskListItem extends StatelessWidget {
-  final dynamic task;
-  final TasksViewModel viewModel;
+  final Task task;
+  final VoidCallback? onToggleCompletion;
+  final Function(ActionMenuAction)? onActionSelected;
 
   const TaskListItem({
     super.key,
     required this.task,
-    required this.viewModel,
+    this.onToggleCompletion,
+    this.onActionSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return AppListItem(
       leading: GestureDetector(
-        onTap: () => viewModel.toggleTaskCompletion(task.id),
+        onTap: onToggleCompletion,
         child: Container(
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: task.isCompleted ? const Color(0xFF34C759) : Colors.transparent,
+            color: task.isCompleted
+                ? const Color(0xFF34C759)
+                : Colors.transparent,
             border: Border.all(
               color: task.isCompleted ? const Color(0xFF34C759) : Colors.grey,
               width: 2,
@@ -33,22 +38,17 @@ class TaskListItem extends StatelessWidget {
               : null,
         ),
       ),
-      title: Text(
-        task.title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: task.isCompleted ? Colors.grey : Colors.black87,
-          decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-        ),
+      title: AppListItemTitle(
+        text: task.title,
+        strikeThrough: task.isCompleted,
+        color: task.isCompleted ? Colors.grey : Colors.black87,
       ),
       subtitle: task.dueDate != null
-          ? Text(
-              _formatTime(task.dueDate!),
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+          ? AppListItemSubtitle(text: _formatTime(task.dueDate!))
+          : null,
+      trailing: onActionSelected != null
+          ? ActionMenu(
+              onSelected: onActionSelected!,
             )
           : null,
     );

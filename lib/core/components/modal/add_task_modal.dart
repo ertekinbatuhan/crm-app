@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/task_model.dart';
 import '../../../models/contact_model.dart';
 import '../../../models/deal_model.dart';
+import '../../constants/app_constants.dart';
 
 class AddTaskModal extends StatefulWidget {
   final List<Contact> contacts;
@@ -32,7 +33,6 @@ class _AddTaskModalState extends State<AddTaskModal> {
   TaskPriority? _selectedPriority;
   Contact? _selectedContact;
   Deal? _selectedDeal;
-  bool _showValidationError = false;
 
   bool get _isEditMode => widget.initialTask != null;
 
@@ -159,24 +159,30 @@ class _AddTaskModalState extends State<AddTaskModal> {
                     children: [
                       _buildInputField(
                         label: 'Task Name',
-                        child: TextFormField(
-                          controller: _taskNameController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter task name',
-                            border: InputBorder.none,
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+                              errorStyle: const TextStyle(
+                                color: AppColors.error,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a task name';
-                            }
-                            return null;
-                          },
+                          child: TextFormField(
+                            controller: _taskNameController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter task name',
+                              border: InputBorder.none,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a task name';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        errorText:
-                            _showValidationError &&
-                                _taskNameController.text.isEmpty
-                            ? 'Please enter a task name'
-                            : null,
                       ),
 
                       const SizedBox(height: 12),
@@ -189,41 +195,55 @@ class _AddTaskModalState extends State<AddTaskModal> {
                           return null;
                         },
                         builder: (state) {
-                          return _buildInputField(
-                            label: 'Due Date',
-                            errorText: state.hasError && _showValidationError
-                                ? state.errorText
-                                : null,
-                            child: GestureDetector(
-                              onTap: () => _selectDate(state),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        _selectedDate != null
-                                            ? _formatDate(_selectedDate!)
-                                            : 'Select due date',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: _selectedDate != null
-                                              ? Colors.black87
-                                              : Colors.grey,
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInputField(
+                                label: 'Due Date',
+                                child: GestureDetector(
+                                  onTap: () => _selectDate(state),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            _selectedDate != null
+                                                ? _formatDate(_selectedDate!)
+                                                : 'Select due date',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: _selectedDate != null
+                                                  ? Colors.black87
+                                                  : Colors.grey,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        const Icon(
+                                          Icons.calendar_today,
+                                          size: 20,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
                                     ),
-                                    const Icon(
-                                      Icons.calendar_today,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
+                              if (state.hasError)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8, left: 16),
+                                  child: Text(
+                                    state.errorText!,
+                                    style: const TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           );
                         },
                       ),
@@ -488,18 +508,14 @@ class _AddTaskModalState extends State<AddTaskModal> {
   Widget _buildInputField({
     required String label,
     required Widget child,
-    String? errorText,
   }) {
-    final showError = errorText != null && errorText.isNotEmpty;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: showError
-              ? Colors.red.withOpacity(0.4)
-              : Colors.grey.withOpacity(0.1),
+          color: Colors.grey.withOpacity(0.1),
           width: 1,
         ),
         boxShadow: [
@@ -515,26 +531,14 @@ class _AddTaskModalState extends State<AddTaskModal> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: showError ? Colors.red : const Color(0xFF374151),
+              color: Color(0xFF374151),
             ),
           ),
           const SizedBox(height: 8),
           child,
-          if (showError)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                errorText!,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -589,11 +593,8 @@ class _AddTaskModalState extends State<AddTaskModal> {
 
   void _submitTask() {
     final isValid = _formKey.currentState!.validate();
-    setState(() {
-      _showValidationError = !isValid;
-    });
 
-    if (!isValid || _selectedPriority == null) {
+    if (!isValid || _selectedPriority == null || _selectedDate == null) {
       return;
     }
 

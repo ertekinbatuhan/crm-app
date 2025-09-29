@@ -3,12 +3,11 @@ import 'package:provider/provider.dart';
 import '../viewmodels/tasks_viewmodel.dart';
 import '../core/components/modal/add_task_modal.dart';
 import '../core/components/tasks/tasks_calendar_header.dart';
-import '../core/components/column/app_section.dart';
+import '../core/components/tasks/tasks_content.dart';
 import '../core/components/common/action_menu.dart';
 import '../core/components/common/danger_button.dart';
-import '../core/components/list-view/app_list_item.dart';
+import '../core/components/view_state_handler.dart';
 import '../core/constants/app_constants.dart';
-import '../models/meeting_model.dart';
 import '../models/task_model.dart';
 
 class TasksView extends StatefulWidget {
@@ -41,123 +40,44 @@ class TasksViewState extends State<TasksView>
   Widget build(BuildContext context) {
     return Consumer<TasksViewModel>(
       builder: (context, viewModel, child) {
-        if (viewModel.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (viewModel.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Error: ${viewModel.errorMessage}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => viewModel.loadTasksData(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
         return Scaffold(
           backgroundColor: const Color(0xFFF8F9FA),
-          body: SafeArea(child: _buildMainView(viewModel)),
+          body: SafeArea(
+            child: ViewStateHandler<TasksViewModel>(
+              state: _getViewState(viewModel),
+              data: viewModel,
+              successBuilder: (viewModel) => _buildMainView(viewModel),
+              loadingMessage: 'Loading tasks...',
+              errorMessage: viewModel.errorMessage,
+              onRetry: () => viewModel.loadTasksData(),
+              emptyTitle: 'No tasks found',
+              emptySubtitle: 'Start by adding your first task',
+              emptyIcon: Icons.task_outlined,
+            ),
+          ),
         );
       },
     );
   }
 
+  ViewState _getViewState(TasksViewModel viewModel) {
+    if (viewModel.isLoading) return ViewState.loading;
+    if (viewModel.hasError) return ViewState.error;
+    return ViewState.success;
+  }
+
   Widget _buildMainView(TasksViewModel viewModel) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          TasksCalendarHeader(viewModel: viewModel),
-
-          AppSection(
-            title: 'Tasks',
-            items: viewModel.selectedDateTasks,
-            itemBuilder: (task) => _buildTaskItem(task, viewModel),
+    return Column(
+      children: [
+        TasksCalendarHeader(viewModel: viewModel),
+        Expanded(
+          child: TasksContent(
+            viewModel: viewModel,
+            onTaskAction: (action, task) => _handleTaskAction(action, task, viewModel),
           ),
-
-          AppSection(
-            title: 'Meetings',
-            items: viewModel.selectedDateMeetings,
-            itemBuilder: _buildMeetingItem,
-            showEmptyState: true,
-          ),
-
-          const SizedBox(height: 100),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaskItem(Task task, TasksViewModel viewModel) {
-    return AppListItem(
-      leading: GestureDetector(
-        onTap: () async {
-          try {
-            await viewModel.toggleTaskCompletion(task.id);
-          } catch (e) {
-            _showSnackBar('Failed to update task: $e');
-          }
-        },
-        child: Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: task.isCompleted
-                ? const Color(0xFF34C759)
-                : Colors.transparent,
-            border: Border.all(
-              color: task.isCompleted ? const Color(0xFF34C759) : Colors.grey,
-              width: 2,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: task.isCompleted
-              ? const Icon(Icons.check, color: Colors.white, size: 16)
-              : null,
         ),
-      ),
-      title: AppListItemTitle(
-        text: task.title,
-        strikeThrough: task.isCompleted,
-        color: task.isCompleted ? Colors.grey : Colors.black87,
-      ),
-      subtitle: task.dueDate != null
-          ? AppListItemSubtitle(text: _formatTime(task.dueDate!))
-          : null,
-      trailing: ActionMenu(
-        onSelected: (action) => _handleTaskAction(action, task, viewModel),
-      ),
+      ],
     );
-  }
-
-  Widget _buildMeetingItem(Meeting meeting) {
-    return AppListItem(
-      leading: AppListItemLeading(
-        backgroundColor: const Color(0xFF007AFF).withOpacity(0.1),
-        child: const Icon(Icons.videocam, color: Color(0xFF007AFF), size: 20),
-      ),
-      title: AppListItemTitle(text: meeting.title),
-      subtitle: AppListItemSubtitle(
-        text:
-            '${_formatTime(meeting.startTime)} - ${_formatTime(meeting.endTime)}',
-      ),
-    );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '${displayHour.toString().padLeft(1, '0')}:${minute.toString().padLeft(2, '0')} $period';
   }
 
   Future<void> showAddTaskDialog() async {
@@ -179,7 +99,7 @@ class TasksViewState extends State<TasksView>
                 Navigator.of(dialogContext).pop(true);
               }
             } catch (e) {
-              _showSnackBar('Failed to create task: $e');
+              // Silent error handling
               if (dialogContext.mounted) {
                 Navigator.of(dialogContext).pop(false);
               }
@@ -188,7 +108,7 @@ class TasksViewState extends State<TasksView>
         ),
       );
     } catch (e) {
-      _showSnackBar('Failed to open dialog: $e');
+      // Silent error handling
     }
   }
 
@@ -208,9 +128,8 @@ class TasksViewState extends State<TasksView>
             if (dialogContext.mounted) {
               Navigator.of(dialogContext).pop(true);
             }
-            _showSnackBar('Task updated');
           } catch (e) {
-            _showSnackBar('Failed to update task: $e');
+            // Silent error handling
             if (dialogContext.mounted) {
               Navigator.of(dialogContext).pop(false);
             }
@@ -239,6 +158,10 @@ class TasksViewState extends State<TasksView>
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusL),
+          ),
           title: const Text('Delete Task'),
           content: Text('Are you sure you want to delete "${task.title}"?'),
           actions: [
@@ -258,17 +181,9 @@ class TasksViewState extends State<TasksView>
     if (shouldDelete == true) {
       try {
         await viewModel.deleteTask(task.id);
-        _showSnackBar('Task deleted');
       } catch (e) {
-        _showSnackBar('Failed to delete task: $e');
+        // Silent error handling - no snackbar
       }
     }
-  }
-
-  void _showSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

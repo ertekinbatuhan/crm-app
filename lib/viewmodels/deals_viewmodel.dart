@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'dart:async';
 import '../models/deal_model.dart';
 import '../core/repositories/deal_repository.dart';
+import '../core/utils/deal_extensions.dart';
 
 @immutable
 class DealsState extends Equatable {

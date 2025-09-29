@@ -4,6 +4,8 @@ import '../../../models/deal_model.dart';
 import '../../../viewmodels/deals_viewmodel.dart';
 import '../../constants/app_constants.dart';
 import '../../utils/date_extensions.dart';
+import '../../utils/deal_extensions.dart';
+import '../../utils/form_validators.dart';
 
 class AddDealModal extends StatefulWidget {
   final DealsViewModel viewModel;
@@ -20,6 +22,7 @@ class AddDealModal extends StatefulWidget {
 }
 
 class _AddDealModalState extends State<AddDealModal> {
+  final _formKey = GlobalKey<FormState>();
   late final TextEditingController titleController;
   late final TextEditingController valueController;
   late final TextEditingController descriptionController;
@@ -79,30 +82,34 @@ class _AddDealModalState extends State<AddDealModal> {
   }
 
   Widget _buildForm() {
-    return Column(
-      children: [
-        _buildTitleField(),
-        const SizedBox(height: AppSizes.paddingM),
-        _buildValueField(),
-        const SizedBox(height: AppSizes.paddingM),
-        _buildStatusDropdown(),
-        const SizedBox(height: AppSizes.paddingM),
-        _buildDescriptionField(),
-      ],
-    );
-  }
-
-  Widget _buildTitleField() {
-    return TextField(
-      controller: titleController,
-      decoration: AppInputDecorations.standard.copyWith(
-        labelText: AppStrings.titleRequired,
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          _buildTitleField(),
+          const SizedBox(height: AppSizes.paddingM),
+          _buildValueField(),
+          const SizedBox(height: AppSizes.paddingM),
+          _buildStatusDropdown(),
+          const SizedBox(height: AppSizes.paddingM),
+          _buildDescriptionField(),
+        ],
       ),
     );
   }
 
+  Widget _buildTitleField() {
+    return TextFormField(
+      controller: titleController,
+      decoration: AppInputDecorations.standard.copyWith(
+        labelText: 'Title *',
+      ),
+      validator: (value) => FormValidators.validateRequired(value, 'Title'),
+    );
+  }
+
   Widget _buildValueField() {
-    return TextField(
+    return TextFormField(
       controller: valueController,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
@@ -110,9 +117,10 @@ class _AddDealModalState extends State<AddDealModal> {
         LengthLimitingTextInputFormatter(15),
       ],
       decoration: AppInputDecorations.standard.copyWith(
-        labelText: AppStrings.valueRequired,
+        labelText: 'Value *',
         prefixText: '\$ ',
       ),
+      validator: (value) => FormValidators.validatePositiveNumber(value, 'Value'),
     );
   }
 
@@ -147,10 +155,11 @@ class _AddDealModalState extends State<AddDealModal> {
   }
 
   Widget _buildDescriptionField() {
-    return TextField(
+    return TextFormField(
       controller: descriptionController,
       decoration: AppInputDecorations.standard.copyWith(
-        labelText: AppStrings.description,
+        labelText: 'Description',
+        hintText: 'Optional details about the deal...',
       ),
       maxLines: 3,
     );
@@ -234,23 +243,12 @@ class _AddDealModalState extends State<AddDealModal> {
   }
 
   Future<void> _handleSubmit() async {
-    // Validate inputs
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     final valueText = valueController.text.trim();
-    final parsedValue = double.tryParse(valueText);
-    
-    if (titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title')),
-      );
-      return;
-    }
-    
-    if (valueText.isEmpty || parsedValue == null || parsedValue <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid positive number for value')),
-      );
-      return;
-    }
+    final parsedValue = double.tryParse(valueText)!;
 
     if (isEditing) {
       final updatedDeal = widget.existingDeal!.copyWith(

@@ -1,7 +1,7 @@
 class FormValidators {
   static String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Name is required';
+      return 'Name field is required';
     }
     if (value.trim().length < 2) {
       return 'Name must be at least 2 characters';
@@ -18,6 +18,7 @@ class FormValidators {
     if (!emailRegex.hasMatch(value.trim())) {
       return 'Please enter a valid email address';
     }
+    
     return null;
   }
 
@@ -26,10 +27,13 @@ class FormValidators {
       return null; // Phone is optional
     }
     
-    final phoneRegex = RegExp(r'^\+?90?\s?5\d{2}\s?\d{3}\s?\d{2}\s?\d{2}$');
-    if (!phoneRegex.hasMatch(value.trim().replaceAll(' ', ''))) {
-      return 'Please enter a valid Turkish phone number';
+    final phoneRegex = RegExp(r'^(\+1)?[2-9][0-9]{2}[2-9][0-9]{2}[0-9]{4}$');
+    final cleanValue = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    
+    if (!phoneRegex.hasMatch(cleanValue)) {
+      return 'Please enter a valid phone number';
     }
+    
     return null;
   }
 
@@ -40,6 +44,30 @@ class FormValidators {
     if (value.trim().length < 2) {
       return 'Company name must be at least 2 characters';
     }
+    return null;
+  }
+
+  static String? validateRequired(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName field is required';
+    }
+    return null;
+  }
+
+  static String? validatePositiveNumber(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName field is required';
+    }
+    
+    final number = double.tryParse(value.trim());
+    if (number == null) {
+      return 'Please enter a valid number';
+    }
+    
+    if (number <= 0) {
+      return '$fieldName must be greater than zero';
+    }
+    
     return null;
   }
 }

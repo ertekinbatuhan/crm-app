@@ -3,12 +3,9 @@ import 'package:provider/provider.dart';
 import '../viewmodels/deals_viewmodel.dart';
 import '../models/deal_model.dart';
 import '../core/components/deals/deal_search_bar.dart';
-import '../core/components/deals/deal_stats_card.dart';
-import '../core/components/deals/deals_list.dart';
-import '../core/components/deals/deals_loading_state.dart';
-import '../core/components/deals/deals_error_state.dart';
+import '../core/components/deals/deals_content.dart';
+import '../core/components/view_state_handler.dart';
 import '../core/components/modal/add_deal_modal.dart';
-import '../core/components/modal/delete_deal_dialog.dart';
 import '../core/constants/app_constants.dart';
 
 class DealsView extends StatefulWidget {
@@ -37,7 +34,24 @@ class DealsViewWidgetState extends State<DealsView> {
               onChanged: viewModel.updateSearchQuery,
             ),
             Expanded(
-              child: _buildContent(viewModel),
+              child: ListViewStateHandler<Deal>(
+                state: _mapDealsStateToViewState(viewModel.state.viewState),
+                items: viewModel.deals,
+                loadingMessage: AppStrings.loadingDeals,
+                emptyTitle: AppStrings.noDealsFound,
+                emptySubtitle: AppStrings.startByAddingDeal,
+                emptyIcon: Icons.handshake_outlined,
+                emptyActionLabel: AppStrings.addDeal,
+                onEmptyAction: showAddDealDialog,
+                errorMessage: viewModel.errorMessage,
+                onRetry: () {
+                  // Stream will automatically retry on error
+                },
+                listBuilder: (deals) => DealsContent(
+                  viewModel: viewModel,
+                  onAddDeal: showAddDealDialog,
+                ),
+              ),
             ),
           ],
         );
@@ -45,77 +59,16 @@ class DealsViewWidgetState extends State<DealsView> {
     );
   }
 
-  Widget _buildContent(DealsViewModel viewModel) {
-    if (viewModel.isLoading) {
-      return const DealsLoadingState(
-        message: AppStrings.loadingDeals,
-      );
+  ViewState _mapDealsStateToViewState(DealsViewState dealState) {
+    switch (dealState) {
+      case DealsViewState.loading:
+        return ViewState.loading;
+      case DealsViewState.loaded:
+        return ViewState.success;
+      case DealsViewState.error:
+        return ViewState.error;
+      case DealsViewState.initial:
+        return ViewState.loading;
     }
-
-    if (viewModel.hasError) {
-      return DealsErrorState(
-        message: viewModel.errorMessage,
-        onRetry: () {
-          // Stream will automatically retry on error
-        },
-      );
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.paddingM),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: DealStatsCard(
-                  title: AppStrings.totalDeals,
-                  value: '${viewModel.totalDealsCount}',
-                  icon: Icons.handshake,
-                  color: const Color(0xFFFF9500),
-                ),
-              ),
-              const SizedBox(width: AppSizes.paddingM),
-              Expanded(
-                child: DealStatsCard(
-                  title: AppStrings.totalValue,
-                  value: '\$${viewModel.totalValue.toStringAsFixed(0)}',
-                  icon: Icons.attach_money,
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.paddingL),
-          DealsList(
-            deals: viewModel.deals,
-            onEditDeal: (deal) => _showEditDealDialog(viewModel, deal),
-            onDeleteDeal: (deal) => _showDeleteConfirmationDialog(viewModel, deal),
-            onAddDeal: showAddDealDialog,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditDealDialog(DealsViewModel viewModel, Deal deal) {
-    showDialog(
-      context: context,
-      builder: (context) => AddDealModal(
-        viewModel: viewModel,
-        existingDeal: deal,
-      ),
-    );
-  }
-
-  void _showDeleteConfirmationDialog(DealsViewModel viewModel, Deal deal) {
-    showDialog(
-      context: context,
-      builder: (context) => DeleteDealDialog(
-        viewModel: viewModel,
-        deal: deal,
-      ),
-    );
   }
 }
