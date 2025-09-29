@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../models/meeting_model.dart';
 import '../models/contact_model.dart';
@@ -8,8 +8,13 @@ import '../services/task_service.dart';
 import '../services/meeting_service.dart';
 import '../services/contact_service.dart';
 import '../services/deal_service.dart';
+import '../core/components/modal/add_task_modal.dart';
+import '../core/components/common/action_menu.dart';
+import '../core/components/common/danger_button.dart';
+import '../core/components/view_state_handler.dart';
+import '../core/constants/app_constants.dart';
 
-enum TasksViewState { initial, loading, loaded, error }
+enum TasksViewModelState { initial, loading, loaded, error }
 
 class TasksViewModel extends ChangeNotifier {
   final TaskService _taskService;
@@ -30,7 +35,7 @@ class TasksViewModel extends ChangeNotifier {
        _dealService = dealService;
 
   // Private fields
-  TasksViewState _state = TasksViewState.initial;
+  TasksViewModelState _state = TasksViewModelState.initial;
   List<Task> _tasks = [];
   List<Task> _filteredTasks = [];
   List<Meeting> _meetings = [];
@@ -43,7 +48,7 @@ class TasksViewModel extends ChangeNotifier {
   String _selectedFilter = 'All'; // All, Today, Completed, Pending
 
   // Getters
-  TasksViewState get state => _state;
+  TasksViewModelState get state => _state;
   List<Task> get tasks => _filteredTasks;
   List<Task> get allTasks => _tasks;
   List<Meeting> get meetings => _meetings;
@@ -54,20 +59,25 @@ class TasksViewModel extends ChangeNotifier {
   DateTime get currentMonth => _currentMonth;
   String get errorMessage => _errorMessage;
   String get selectedFilter => _selectedFilter;
-  bool get isLoading => _state == TasksViewState.loading;
-  bool get hasError => _state == TasksViewState.error;
-  bool get isLoaded => _state == TasksViewState.loaded;
+  bool get isLoading => _state == TasksViewModelState.loading;
+  bool get hasError => _state == TasksViewModelState.error;
+  bool get isLoaded => _state == TasksViewModelState.loaded;
+  ViewState get viewState {
+    if (isLoading) return ViewState.loading;
+    if (hasError) return ViewState.error;
+    return ViewState.success;
+  }
 
   // Public methods
   Future<void> loadTasksData() async {
-    _setState(TasksViewState.loading);
+    _setState(TasksViewModelState.loading);
     await _tasksSubscription?.cancel();
-    
+
     // Reset to today's date when loading data
     final today = DateTime.now();
     _selectedDate = today;
     _currentMonth = DateTime(today.year, today.month);
-    
+
     try {
       final results = await Future.wait([
         _taskService.getTasksStream().first,
@@ -83,15 +93,15 @@ class TasksViewModel extends ChangeNotifier {
 
       _applyFilters();
       _loadTodayMeetings();
-      _setState(TasksViewState.loaded);
+      _setState(TasksViewModelState.loaded);
 
       _tasksSubscription = _taskService.getTasksStream().listen(
         (tasks) {
           _tasks = [...tasks]..sort(_sortByDueDate);
           _applyFilters();
           _loadTodayMeetings();
-          if (_state != TasksViewState.loaded) {
-            _state = TasksViewState.loaded;
+          if (_state != TasksViewModelState.loaded) {
+            _state = TasksViewModelState.loaded;
           }
           notifyListeners();
         },
@@ -143,6 +153,114 @@ class TasksViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> handleTaskAction(
+    BuildContext context,
+    ActionMenuAction action,
+    Task task,
+  ) async {
+    switch (action) {
+      case ActionMenuAction.edit:
+        await showEditTaskDialog(context, task);
+        break;
+      case ActionMenuAction.delete:
+        await confirmDeleteTask(context, task);
+        break;
+    }
+  }
+
+  Future<void> showAddTaskDialog(BuildContext context) async {
+    if (!context.mounted) return;
+
+    try {
+      await showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) => AddTaskModal(
+          contacts: contacts,
+          deals: deals,
+          onSubmit: (task) async {
+            try {
+              await createTask(task);
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop(true);
+              }
+            } catch (_) {
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop(false);
+              }
+            }
+          },
+        ),
+      );
+    } catch (_) {
+      // Silent error handling
+    }
+  }
+
+  Future<void> showEditTaskDialog(BuildContext context, Task task) async {
+    if (!context.mounted) return;
+
+    await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AddTaskModal(
+        contacts: contacts,
+        deals: deals,
+        initialTask: task,
+        title: 'Edit Task',
+        submitButtonLabel: 'Update Task',
+        onSubmit: (updatedTask) async {
+          try {
+            await updateTask(updatedTask);
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext).pop(true);
+            }
+          } catch (_) {
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext).pop(false);
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> confirmDeleteTask(BuildContext context, Task task) async {
+    if (!context.mounted) return;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusL),
+          ),
+          title: const Text('Delete Task'),
+          content: Text('Are you sure you want to delete "${task.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text(AppStrings.cancel),
+            ),
+            DangerButton(
+              label: AppStrings.delete,
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      try {
+        await deleteTask(task.id);
+      } catch (_) {
+        // Silent error handling - no snackbar
+      }
+    }
+  }
+
   void changeFilter(String filter) {
     _selectedFilter = filter;
     _applyFilters();
@@ -170,13 +288,13 @@ class TasksViewModel extends ChangeNotifier {
   }
 
   // Private methods
-  void _setState(TasksViewState newState) {
+  void _setState(TasksViewModelState newState) {
     _state = newState;
     notifyListeners();
   }
 
   void _setError(String message) {
-    _state = TasksViewState.error;
+    _state = TasksViewModelState.error;
     _errorMessage = message;
     notifyListeners();
   }
