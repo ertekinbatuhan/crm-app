@@ -2,18 +2,15 @@ import '../../models/contact_model.dart';
 import '../../services/contact_service.dart';
 
 abstract class ContactRepository {
-  Future<List<Contact>> getContacts();
   Stream<List<Contact>> getContactsStream();
   Future<Contact> createContact(Contact contact);
   Future<Contact> updateContact(Contact contact);
   Future<void> deleteContact(String contactId);
   Future<List<Contact>> searchContacts(String query);
   
-
   void clearCache();
   bool get hasCache;
 }
-
 
 class Result<T> {
   final T? data;
@@ -48,32 +45,8 @@ class ContactRepositoryImpl implements ContactRepository {
   }
 
   @override
-  Future<List<Contact>> getContacts() async {
-
-    if (hasCache) {
-      return _cachedContacts!;
-    }
-
-    try {
-      final contacts = await _contactService.getContacts();
-      _cachedContacts = contacts;
-      _lastCacheTime = DateTime.now();
-      return contacts;
-    } catch (e) {
-
-      if (_cachedContacts != null) {
-        return _cachedContacts!;
-      }
-      rethrow;
-    }
-  }
-
-  @override
   Stream<List<Contact>> getContactsStream() {
-    // For real-time updates, we don't want to use cache
-    // Always get fresh data from the service
     return _contactService.getContactsStream().map((contacts) {
-      // Update cache when we receive new data
       _cachedContacts = contacts;
       _lastCacheTime = DateTime.now();
       return contacts;
@@ -83,43 +56,27 @@ class ContactRepositoryImpl implements ContactRepository {
   @override
   Future<Contact> createContact(Contact contact) async {
     final newContact = await _contactService.createContact(contact);
-    
-
-    if (_cachedContacts != null) {
-      _cachedContacts!.add(newContact);
-    }
-    
+    clearCache();
     return newContact;
   }
 
   @override
   Future<Contact> updateContact(Contact contact) async {
     final updatedContact = await _contactService.updateContact(contact);
-    
-
-    if (_cachedContacts != null) {
-      final index = _cachedContacts!.indexWhere((c) => c.id == contact.id);
-      if (index != -1) {
-        _cachedContacts![index] = updatedContact;
-      }
-    }
-    
+    clearCache();
     return updatedContact;
   }
 
   @override
   Future<void> deleteContact(String contactId) async {
     await _contactService.deleteContact(contactId);
-    
-
-    if (_cachedContacts != null) {
-      _cachedContacts!.removeWhere((contact) => contact.id == contactId);
-    }
+    clearCache();
   }
 
   @override
   Future<List<Contact>> searchContacts(String query) async {
-    final contacts = await getContacts();
+    // Use cached data from stream, or wait for first stream emission if no cache
+    final contacts = _cachedContacts ?? await getContactsStream().first;
     
     if (query.isEmpty) return contacts;
     

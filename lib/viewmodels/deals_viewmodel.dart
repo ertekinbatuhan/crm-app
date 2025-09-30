@@ -1,112 +1,267 @@
 import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
+import 'dart:async';
 import '../models/deal_model.dart';
-import '../services/deal_service.dart';
+import '../core/repositories/deal_repository.dart';
+import '../core/utils/deal_extensions.dart';
+
+@immutable
+class DealsState extends Equatable {
+  final DealsViewState viewState;
+  final List<Deal> deals;
+  final List<Deal> filteredDeals;
+  final String searchQuery;
+  final String errorMessage;
+  final DealStatus? selectedStatusFilter;
+  final String sortBy;
+
+  const DealsState({
+    required this.viewState,
+    required this.deals,
+    required this.filteredDeals,
+    required this.searchQuery,
+    required this.errorMessage,
+    required this.selectedStatusFilter,
+    required this.sortBy,
+  });
+
+  factory DealsState.initial() {
+    return const DealsState(
+      viewState: DealsViewState.initial,
+      deals: [],
+      filteredDeals: [],
+      searchQuery: '',
+      errorMessage: '',
+      selectedStatusFilter: null,
+      sortBy: 'value',
+    );
+  }
+
+  DealsState copyWith({
+    DealsViewState? viewState,
+    List<Deal>? deals,
+    List<Deal>? filteredDeals,
+    String? searchQuery,
+    String? errorMessage,
+    DealStatus? selectedStatusFilter,
+    String? sortBy,
+  }) {
+    return DealsState(
+      viewState: viewState ?? this.viewState,
+      deals: deals ?? this.deals,
+      filteredDeals: filteredDeals ?? this.filteredDeals,
+      searchQuery: searchQuery ?? this.searchQuery,
+      errorMessage: errorMessage ?? this.errorMessage,
+      selectedStatusFilter: selectedStatusFilter,
+      sortBy: sortBy ?? this.sortBy,
+    );
+  }
+
+  bool get isLoading => viewState == DealsViewState.loading;
+  bool get hasError => viewState == DealsViewState.error;
+  bool get isLoaded => viewState == DealsViewState.loaded;
+
+  @override
+  List<Object?> get props => [
+        viewState,
+        deals,
+        filteredDeals,
+        searchQuery,
+        errorMessage,
+        selectedStatusFilter,
+        sortBy,
+      ];
+}
 
 enum DealsViewState { initial, loading, loaded, error }
 
 class DealsViewModel extends ChangeNotifier {
-  final DealService _dealService;
+  final DealRepository _dealRepository;
+  DealsState _state = DealsState.initial();
+  StreamSubscription<List<Deal>>? _dealsSubscription;
 
-  DealsViewModel(this._dealService);
+  DealsViewModel(this._dealRepository) {
+    _listenToDeals();
+  }
 
-  DealsViewState _state = DealsViewState.initial;
-  List<Deal> _deals = [];
-  List<Deal> _filteredDeals = [];
-  DealStatus? _selectedStatusFilter;
-  String _searchQuery = '';
-  String _errorMessage = '';
-  String _sortBy = 'value';
-  DealsViewState get state => _state;
-  List<Deal> get deals => _filteredDeals;
-  List<Deal> get allDeals => _deals;
-  DealStatus? get selectedStatusFilter => _selectedStatusFilter;
-  String get searchQuery => _searchQuery;
-  String get sortBy => _sortBy;
-  String get errorMessage => _errorMessage;
-  bool get isLoading => _state == DealsViewState.loading;
-  bool get hasError => _state == DealsViewState.error;
-  bool get isLoaded => _state == DealsViewState.loaded;
-  Future<void> loadDeals() async {
-    _setState(DealsViewState.loading);
+  DealsState get state => _state;
+
+  List<Deal> get deals => _state.filteredDeals;  
+  List<Deal> get allDeals => _state.deals;      
+  String get searchQuery => _state.searchQuery;
+  DealStatus? get selectedStatusFilter => _state.selectedStatusFilter;
+  String get sortBy => _state.sortBy;
+  String get errorMessage => _state.errorMessage;
+  bool get isLoading => _state.isLoading;
+  bool get hasError => _state.hasError;
+  bool get isLoaded => _state.isLoaded;
+  int get totalDealsCount => allDeals.length;    
+  double get totalValue => allDeals.fold(0.0, (sum, deal) => sum + deal.value); 
+
+  void _updateState(DealsState newState) {
+    _state = newState;
+    notifyListeners();
+  }
+
+  void _listenToDeals() {
+    // Avoid multiple subscriptions
+    if (_dealsSubscription != null) {
+      _dealsSubscription?.cancel();
+    }
+    
+    _updateState(_state.copyWith(viewState: DealsViewState.loading));
+    
+    _dealsSubscription = _dealRepository.getDealsStream().listen(
+      (deals) {
+        final filteredDeals = _applyFiltersAndSort(
+          deals, 
+          _state.searchQuery, 
+          _state.selectedStatusFilter,
+          _state.sortBy,
+        );
+        
+        _updateState(_state.copyWith(
+          viewState: DealsViewState.loaded,
+          deals: deals,
+          filteredDeals: filteredDeals,
+          errorMessage: '',
+        ));
+      },
+      onError: (error) {
+        _updateState(_state.copyWith(
+          viewState: DealsViewState.error,
+          errorMessage: error.toString(),
+        ));
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _dealsSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<bool> createDeal(Deal deal) async {
     try {
-      _deals = [];
-      _applyFiltersAndSort();
-      _setState(DealsViewState.loaded);
+      await _dealRepository.createDeal(deal);
+      // Real-time stream will automatically update the state
+      return true;
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: DealsViewState.error,
+        errorMessage: e.toString(),
+      ));
+      return false;
     }
   }
-  Future<void> createDeal(Deal deal) async {
+
+  Future<bool> updateDeal(Deal deal) async {
     try {
-      _deals.add(deal);
-      _applyFiltersAndSort();
-      notifyListeners();
+      await _dealRepository.updateDeal(deal);
+      return true;
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: DealsViewState.error,
+        errorMessage: e.toString(),
+      ));
+      return false;
     }
   }
-  Future<void> updateDeal(Deal deal) async {
-    try {
-      final index = _deals.indexWhere((d) => d.id == deal.id);
-      if (index != -1) {
-        _deals[index] = deal;
-        _applyFiltersAndSort();
-        notifyListeners();
-      }
-    } catch (e) {
-      _setError(e.toString());
-    }
-  }
+
   Future<void> deleteDeal(String dealId) async {
     try {
-      _deals.removeWhere((deal) => deal.id == dealId);
-      _applyFiltersAndSort();
-      notifyListeners();
+      await _dealRepository.deleteDeal(dealId);
     } catch (e) {
-      _setError(e.toString());
+      _updateState(_state.copyWith(
+        viewState: DealsViewState.error,
+        errorMessage: e.toString(),
+      ));
     }
   }
-  void setStatusFilter(DealStatus? status) {
-    _selectedStatusFilter = status;
-    _applyFiltersAndSort();
-    notifyListeners();
-  }
-  void setSearchQuery(String query) {
-    _searchQuery = query.toLowerCase();
-    _applyFiltersAndSort();
-    notifyListeners();
-  }
+
   void updateSearchQuery(String query) {
-    setSearchQuery(query);
+    final filteredDeals = _applyFiltersAndSort(
+      _state.deals, 
+      query, 
+      _state.selectedStatusFilter,
+      _state.sortBy,
+    );
+    
+    _updateState(_state.copyWith(
+      searchQuery: query,
+      filteredDeals: filteredDeals,
+    ));
   }
-  int get totalDeals => _deals.length;
-  double get totalValue => _deals.fold(0.0, (sum, deal) => sum + deal.value);
+
+  void setStatusFilter(DealStatus? status) {
+    final filteredDeals = _applyFiltersAndSort(
+      _state.deals, 
+      _state.searchQuery, 
+      status,
+      _state.sortBy,
+    );
+    
+    _updateState(_state.copyWith(
+      selectedStatusFilter: status,
+      filteredDeals: filteredDeals,
+    ));
+  }
+
   void setSortBy(String sortBy) {
-    _sortBy = sortBy;
-    _applyFiltersAndSort();
-    notifyListeners();
+    final filteredDeals = _applyFiltersAndSort(
+      _state.deals, 
+      _state.searchQuery, 
+      _state.selectedStatusFilter,
+      sortBy,
+    );
+    
+    _updateState(_state.copyWith(
+      sortBy: sortBy,
+      filteredDeals: filteredDeals,
+    ));
   }
+
   void clearFilters() {
-    _selectedStatusFilter = null;
-    _searchQuery = '';
-    _applyFiltersAndSort();
-    notifyListeners();
+    final filteredDeals = _applyFiltersAndSort(
+      _state.deals, 
+      '', 
+      null,
+      _state.sortBy,
+    );
+    
+    _updateState(_state.copyWith(
+      selectedStatusFilter: null,
+      searchQuery: '',
+      filteredDeals: filteredDeals,
+    ));
   }
-  void _applyFiltersAndSort() {
-    List<Deal> filtered = List.from(_deals);
-    if (_searchQuery.isNotEmpty) {
-      final lowercaseQuery = _searchQuery.toLowerCase();
+
+  List<Deal> _applyFiltersAndSort(
+    List<Deal> deals, 
+    String searchQuery, 
+    DealStatus? statusFilter,
+    String sortBy,
+  ) {
+    List<Deal> filtered = List.from(deals);
+
+    if (searchQuery.isNotEmpty) {
+      final lowercaseQuery = searchQuery.toLowerCase();
       filtered = filtered.where((deal) {
         return deal.title.toLowerCase().contains(lowercaseQuery) ||
-               (deal.description?.toLowerCase().contains(lowercaseQuery) ?? false);
+               (deal.description?.toLowerCase().contains(lowercaseQuery) ?? false) ||
+               deal.value.toString().contains(searchQuery) ||
+               deal.status.displayName.toLowerCase().contains(lowercaseQuery);
       }).toList();
     }
-    if (_selectedStatusFilter != null) {
+
+    if (statusFilter != null) {
       filtered = filtered
-          .where((deal) => deal.status == _selectedStatusFilter)
+          .where((deal) => deal.status == statusFilter)
           .toList();
     }
-    switch (_sortBy) {
+
+    switch (sortBy) {
       case 'value':
         filtered.sort((a, b) => b.value.compareTo(a.value));
         break;
@@ -127,39 +282,49 @@ class DealsViewModel extends ChangeNotifier {
         });
         break;
     }
-    _filteredDeals = filtered;
+
+    return filtered;
   }
-  void _setState(DealsViewState newState) {
-    _state = newState;
-    notifyListeners();
+
+  void clearCache() {
+    _dealRepository.clearCache();
   }
-  void _setError(String message) {
-    _state = DealsViewState.error;
-    _errorMessage = message;
-    notifyListeners();
+
+  void refreshDeals() {
+    _dealsSubscription?.cancel();
+    clearCache();
+    _listenToDeals();
   }
+
+  // Analytics methods
   Deal? getDealById(String id) {
     try {
-      return _deals.firstWhere((deal) => deal.id == id);
+      return _state.deals.firstWhere((deal) => deal.id == id);
     } catch (e) {
       return null;
     }
   }
+
   List<Deal> getDealsByStatus(DealStatus status) {
-    return _deals.where((deal) => deal.status == status).toList();
+    return _state.deals.where((deal) => deal.status == status).toList();
   }
+
   double get totalDealValue =>
-      _deals.fold(0.0, (sum, deal) => sum + deal.value);
+      _state.deals.fold(0.0, (sum, deal) => sum + deal.value);
+
   double get filteredDealValue =>
-      _filteredDeals.fold(0.0, (sum, deal) => sum + deal.value);
+      _state.filteredDeals.fold(0.0, (sum, deal) => sum + deal.value);
+
   double getDealValueByStatus(DealStatus status) {
     return getDealsByStatus(status).fold(0.0, (sum, deal) => sum + deal.value);
   }
-  int get totalDealsCount => _deals.length;
-  int get filteredDealsCount => _filteredDeals.length;
+
+  int get filteredDealsCount => _state.filteredDeals.length;
+
   int getDealsCountByStatus(DealStatus status) {
     return getDealsByStatus(status).length;
   }
+
   Map<DealStatus, int> get dealCountByStatus {
     final Map<DealStatus, int> statusCount = {};
     for (final status in DealStatus.values) {
@@ -167,6 +332,7 @@ class DealsViewModel extends ChangeNotifier {
     }
     return statusCount;
   }
+
   Map<DealStatus, double> get dealValueByStatus {
     final Map<DealStatus, double> statusValue = {};
     for (final status in DealStatus.values) {
@@ -174,14 +340,17 @@ class DealsViewModel extends ChangeNotifier {
     }
     return statusValue;
   }
+
   double get averageDealValue {
-    if (_deals.isEmpty) return 0.0;
-    return totalDealValue / _deals.length;
+    if (_state.deals.isEmpty) return 0.0;
+    return totalDealValue / _state.deals.length;
   }
+
   List<Deal> get highValueDeals {
     final avgValue = averageDealValue;
-    return _deals.where((deal) => deal.value > avgValue).toList();
+    return _state.deals.where((deal) => deal.value > avgValue).toList();
   }
+
   double get winRate {
     final closedDeals = getDealsCountByStatus(DealStatus.closed);
     final lostDeals = getDealsCountByStatus(DealStatus.lost);

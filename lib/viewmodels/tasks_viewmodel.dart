@@ -1,55 +1,114 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../models/meeting_model.dart';
+import '../models/contact_model.dart';
+import '../models/deal_model.dart';
 import '../services/task_service.dart';
 import '../services/meeting_service.dart';
+import '../services/contact_service.dart';
+import '../services/deal_service.dart';
+import '../core/components/modal/add_task_modal.dart';
+import '../core/components/common/action_menu.dart';
+import '../core/components/common/danger_button.dart';
+import '../core/components/view_state_handler.dart';
+import '../core/constants/app_constants.dart';
 
-enum TasksViewState { initial, loading, loaded, error }
+enum TasksViewModelState { initial, loading, loaded, error }
 
 class TasksViewModel extends ChangeNotifier {
   final TaskService _taskService;
   final MeetingService _meetingService;
+  final ContactService _contactService;
+  final DealService _dealService;
+
+  StreamSubscription<List<Task>>? _tasksSubscription;
 
   TasksViewModel({
     required TaskService taskService,
     required MeetingService meetingService,
+    required ContactService contactService,
+    required DealService dealService,
   }) : _taskService = taskService,
-       _meetingService = meetingService;
+       _meetingService = meetingService,
+       _contactService = contactService,
+       _dealService = dealService;
 
   // Private fields
-  TasksViewState _state = TasksViewState.initial;
+  TasksViewModelState _state = TasksViewModelState.initial;
   List<Task> _tasks = [];
   List<Task> _filteredTasks = [];
   List<Meeting> _meetings = [];
   List<Meeting> _todayMeetings = [];
+  List<Contact> _contacts = [];
+  List<Deal> _deals = [];
   DateTime _selectedDate = DateTime.now();
   DateTime _currentMonth = DateTime.now();
   String _errorMessage = '';
   String _selectedFilter = 'All'; // All, Today, Completed, Pending
 
   // Getters
-  TasksViewState get state => _state;
+  TasksViewModelState get state => _state;
   List<Task> get tasks => _filteredTasks;
   List<Task> get allTasks => _tasks;
   List<Meeting> get meetings => _meetings;
   List<Meeting> get todayMeetings => _todayMeetings;
+  List<Contact> get contacts => _contacts;
+  List<Deal> get deals => _deals;
   DateTime get selectedDate => _selectedDate;
   DateTime get currentMonth => _currentMonth;
   String get errorMessage => _errorMessage;
   String get selectedFilter => _selectedFilter;
-  bool get isLoading => _state == TasksViewState.loading;
-  bool get hasError => _state == TasksViewState.error;
-  bool get isLoaded => _state == TasksViewState.loaded;
+  bool get isLoading => _state == TasksViewModelState.loading;
+  bool get hasError => _state == TasksViewModelState.error;
+  bool get isLoaded => _state == TasksViewModelState.loaded;
+  ViewState get viewState {
+    if (isLoading) return ViewState.loading;
+    if (hasError) return ViewState.error;
+    return ViewState.success;
+  }
 
   // Public methods
   Future<void> loadTasksData() async {
-    _setState(TasksViewState.loading);
+    _setState(TasksViewModelState.loading);
+    await _tasksSubscription?.cancel();
+
+    // Reset to today's date when loading data
+    final today = DateTime.now();
+    _selectedDate = today;
+    _currentMonth = DateTime(today.year, today.month);
+
     try {
-      _tasks = [];
-      _meetings = [];
+      final results = await Future.wait([
+        _taskService.getTasksStream().first,
+        _meetingService.getMeetingsStream().first,
+        _contactService.getContactsStream().first,
+        _dealService.getDealsStream().first,
+      ]);
+
+      _tasks = (results[0] as List<Task>)..sort(_sortByDueDate);
+      _meetings = results[1] as List<Meeting>;
+      _contacts = results[2] as List<Contact>;
+      _deals = results[3] as List<Deal>;
+
       _applyFilters();
       _loadTodayMeetings();
-      _setState(TasksViewState.loaded);
+      _setState(TasksViewModelState.loaded);
+
+      _tasksSubscription = _taskService.getTasksStream().listen(
+        (tasks) {
+          _tasks = [...tasks]..sort(_sortByDueDate);
+          _applyFilters();
+          _loadTodayMeetings();
+          if (_state != TasksViewModelState.loaded) {
+            _state = TasksViewModelState.loaded;
+          }
+          notifyListeners();
+        },
+        onError: (error) {
+          _setError(error.toString());
+        },
+      );
     } catch (e) {
       _setError(e.toString());
     }
@@ -57,32 +116,28 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> createTask(Task task) async {
     try {
-      _tasks.add(task);
-      _applyFilters();
-      notifyListeners();
+      await _taskService.createTask(task);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
+      rethrow;
     }
   }
 
   Future<void> updateTask(Task task) async {
     try {
-      final index = _tasks.indexWhere((t) => t.id == task.id);
-      if (index != -1) {
-        _tasks[index] = task;
-        _applyFilters();
-        notifyListeners();
-      }
+      await _taskService.updateTask(task);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
+      rethrow;
     }
   }
 
   Future<void> deleteTask(String taskId) async {
     try {
-      _tasks.removeWhere((task) => task.id == taskId);
-      _applyFilters();
-      notifyListeners();
+      await _taskService.deleteTask(taskId);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
     }
@@ -90,14 +145,119 @@ class TasksViewModel extends ChangeNotifier {
 
   Future<void> toggleTaskCompletion(String taskId) async {
     try {
-      final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
-      if (taskIndex != -1) {
-        final task = _tasks[taskIndex];
-        final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
-        await updateTask(updatedTask);
-      }
+      await _taskService.toggleTaskCompletion(taskId);
+      // Stream will handle the state update automatically
     } catch (e) {
       _setError(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> handleTaskAction(
+    BuildContext context,
+    ActionMenuAction action,
+    Task task,
+  ) async {
+    switch (action) {
+      case ActionMenuAction.edit:
+        await showEditTaskDialog(context, task);
+        break;
+      case ActionMenuAction.delete:
+        await confirmDeleteTask(context, task);
+        break;
+    }
+  }
+
+  Future<void> showAddTaskDialog(BuildContext context) async {
+    if (!context.mounted) return;
+
+    try {
+      await showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) => AddTaskModal(
+          contacts: contacts,
+          deals: deals,
+          onSubmit: (task) async {
+            try {
+              await createTask(task);
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop(true);
+              }
+            } catch (_) {
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop(false);
+              }
+            }
+          },
+        ),
+      );
+    } catch (_) {
+      // Silent error handling
+    }
+  }
+
+  Future<void> showEditTaskDialog(BuildContext context, Task task) async {
+    if (!context.mounted) return;
+
+    await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AddTaskModal(
+        contacts: contacts,
+        deals: deals,
+        initialTask: task,
+        title: 'Edit Task',
+        submitButtonLabel: 'Update Task',
+        onSubmit: (updatedTask) async {
+          try {
+            await updateTask(updatedTask);
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext).pop(true);
+            }
+          } catch (_) {
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext).pop(false);
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> confirmDeleteTask(BuildContext context, Task task) async {
+    if (!context.mounted) return;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusL),
+          ),
+          title: const Text('Delete Task'),
+          content: Text('Are you sure you want to delete "${task.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text(AppStrings.cancel),
+            ),
+            DangerButton(
+              label: AppStrings.delete,
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      try {
+        await deleteTask(task.id);
+      } catch (_) {
+        // Silent error handling - no snackbar
+      }
     }
   }
 
@@ -128,13 +288,13 @@ class TasksViewModel extends ChangeNotifier {
   }
 
   // Private methods
-  void _setState(TasksViewState newState) {
+  void _setState(TasksViewModelState newState) {
     _state = newState;
     notifyListeners();
   }
 
   void _setError(String message) {
-    _state = TasksViewState.error;
+    _state = TasksViewModelState.error;
     _errorMessage = message;
     notifyListeners();
   }
@@ -167,6 +327,15 @@ class TasksViewModel extends ChangeNotifier {
               meeting.startTime.day == today.day,
         )
         .toList();
+  }
+
+  int _sortByDueDate(Task a, Task b) {
+    if (a.dueDate == null && b.dueDate == null) {
+      return a.title.compareTo(b.title);
+    }
+    if (a.dueDate == null) return 1;
+    if (b.dueDate == null) return -1;
+    return a.dueDate!.compareTo(b.dueDate!);
   }
 
   // Month navigation methods
@@ -249,6 +418,7 @@ class TasksViewModel extends ChangeNotifier {
     ];
     return '${monthNames[_currentMonth.month - 1]} ${_currentMonth.year}';
   }
+
   String get selectedDateString {
     const monthNames = [
       'January',
@@ -358,5 +528,11 @@ class TasksViewModel extends ChangeNotifier {
 
   int get completedTasksToday {
     return selectedDateTasks.where((task) => task.isCompleted).length;
+  }
+
+  @override
+  void dispose() {
+    _tasksSubscription?.cancel();
+    super.dispose();
   }
 }
