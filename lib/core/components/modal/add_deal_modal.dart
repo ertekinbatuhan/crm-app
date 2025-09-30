@@ -131,7 +131,7 @@ class _AddDealModalState extends State<AddDealModal> {
           canvasColor: AppColors.white,
         ),
         child: DropdownButtonFormField<DealStatus>(
-          value: selectedStatus,
+          initialValue: selectedStatus,
           decoration: AppInputDecorations.standard.copyWith(
             labelText: AppStrings.status,
           ),
@@ -260,7 +260,8 @@ class _AddDealModalState extends State<AddDealModal> {
             : descriptionController.text.trim(),
       );
       final success = await widget.viewModel.updateDeal(updatedDeal);
-      if (success && context.mounted) {
+      if (!mounted) return;
+      if (success) {
         Navigator.pop(context);
       }
     } else {
@@ -274,7 +275,8 @@ class _AddDealModalState extends State<AddDealModal> {
             : descriptionController.text.trim(),
       );
       final success = await widget.viewModel.createDeal(deal);
-      if (success && context.mounted) {
+      if (!mounted) return;
+      if (success) {
         Navigator.pop(context);
       }
     }

@@ -27,7 +27,7 @@ class DashboardMetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -41,7 +41,7 @@ class DashboardMetricCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: iconColor, size: 24),
@@ -57,8 +57,8 @@ class DashboardMetricCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: (subtitleColor ?? Colors.green).withOpacity(
-                          0.15,
+                        color: (subtitleColor ?? Colors.green).withValues(
+                          alpha: 0.15,
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),

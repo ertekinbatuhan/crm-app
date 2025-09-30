@@ -17,10 +17,14 @@ class FirebaseContactService implements ContactService {
   @override
   Stream<List<Contact>> getContactsStream() {
     try {
-      return _firestore.collection(_collection).orderBy('name').snapshots().map(
-        (QuerySnapshot snapshot) {
-          return snapshot.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
+      return _firestore
+          .collection(_collection)
+          .orderBy('name')
+          .snapshots()
+          .map(
+        (QuerySnapshot<Map<String, dynamic>> snapshot) {
+          return snapshot.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+            final data = doc.data();
             data['id'] = doc.id;
             return Contact.fromMap(data);
           }).toList();
@@ -39,8 +43,8 @@ class FirebaseContactService implements ContactService {
           .orderBy('name')
           .get();
 
-      return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+      return snapshot.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+        final data = doc.data();
         data['id'] = doc.id;
         return Contact.fromMap(data);
       }).toList();

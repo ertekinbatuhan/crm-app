@@ -21,9 +21,9 @@ class FirebaseDealService implements DealService {
           .collection(_collection)
           .orderBy('title')
           .snapshots()
-          .map((QuerySnapshot snapshot) {
-            return snapshot.docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
+          .map((QuerySnapshot<Map<String, dynamic>> snapshot) {
+            return snapshot.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+              final data = doc.data();
               data['id'] = doc.id;
               return Deal.fromMap(data);
             }).toList();
@@ -41,8 +41,8 @@ class FirebaseDealService implements DealService {
           .orderBy('title')
           .get();
 
-      return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+      return snapshot.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+        final data = doc.data();
         data['id'] = doc.id;
         return Deal.fromMap(data);
       }).toList();
