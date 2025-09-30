@@ -8,6 +8,7 @@ import 'contacts_view.dart';
 import 'deals_view.dart';
 import 'reports_view.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
+import '../viewmodels/tasks_viewmodel.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -35,7 +36,7 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBarFactory.create(
+        appBar: AppBarFactory.create(
         selectedIndex: selectedNavIndex,
         onContactsAdd: () {
           if (_contactsKey.currentState != null) {
@@ -48,7 +49,9 @@ class _DashboardViewState extends State<DashboardView> {
           }
         },
         onTasksAdd: () {
-          _tasksKey.currentState?.showAddTaskDialog();
+          if (mounted) {
+            context.read<TasksViewModel>().showAddTaskDialog(context);
+          }
         },
       ),
       body: Column(

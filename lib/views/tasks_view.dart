@@ -69,9 +69,4 @@ class TasksViewState extends State<TasksView>
       ],
     );
   }
-
-  Future<void> showAddTaskDialog() async {
-    final viewModel = context.read<TasksViewModel>();
-    await viewModel.showAddTaskDialog(context);
-  }
 }
