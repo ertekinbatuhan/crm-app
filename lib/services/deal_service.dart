@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/deal_model.dart';
+import '../core/constants/firestore_constants.dart';
+import '../core/errors/exceptions.dart';
 
 abstract class DealService {
   Stream<List<Deal>> getDealsStream();
@@ -11,8 +13,11 @@ abstract class DealService {
 }
 
 class FirebaseDealService implements DealService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collection = 'deals';
+  final FirebaseFirestore _firestore;
+  final String _collection = FirestoreCollections.deals;
+
+  FirebaseDealService([FirebaseFirestore? firestore])
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Stream<List<Deal>> getDealsStream() {
@@ -24,12 +29,15 @@ class FirebaseDealService implements DealService {
           .map((QuerySnapshot snapshot) {
             return snapshot.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              data['id'] = doc.id;
-              return Deal.fromMap(data);
+              return Deal.fromMap({...data, 'id': doc.id});
             }).toList();
           });
     } catch (e) {
-      throw Exception('Error streaming deals: $e');
+      throw FirestoreException(
+        message: 'Error streaming deals',
+        code: 'STREAM_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -43,11 +51,14 @@ class FirebaseDealService implements DealService {
 
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return Deal.fromMap(data);
+        return Deal.fromMap({...data, 'id': doc.id});
       }).toList();
     } catch (e) {
-      throw Exception('Error fetching deals: $e');
+      throw FirestoreException(
+        message: 'Error fetching deals',
+        code: 'FETCH_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -74,7 +85,11 @@ class FirebaseDealService implements DealService {
 
       return dealWithId;
     } catch (e) {
-      throw Exception('Error creating deal: $e');
+      throw FirestoreException(
+        message: 'Error creating deal',
+        code: 'CREATE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -82,7 +97,7 @@ class FirebaseDealService implements DealService {
   Future<Deal> updateDeal(Deal deal) async {
     try {
       if (deal.id.isEmpty) {
-        throw Exception('Deal ID cannot be empty');
+        throw ValidationException.requiredField('deal.id');
       }
 
       final currentDoc = await _firestore
@@ -108,8 +123,14 @@ class FirebaseDealService implements DealService {
       await _firestore.collection(_collection).doc(deal.id).update(dealData);
 
       return updatedDeal;
+    } on ValidationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error updating deal: $e');
+      throw FirestoreException(
+        message: 'Error updating deal',
+        code: 'UPDATE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -117,12 +138,19 @@ class FirebaseDealService implements DealService {
   Future<void> deleteDeal(String dealId) async {
     try {
       if (dealId.isEmpty) {
-        throw Exception('Deal ID cannot be empty');
+        throw ValidationException.requiredField('dealId');
       }
 
       await _firestore.collection(_collection).doc(dealId).delete();
+    } on ValidationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error deleting deal: $e');
+      throw FirestoreException(
+        message: 'Error deleting deal',
+        code: 'DELETE_ERROR',
+        originalError: e,
+      );
     }
   }
 }
+

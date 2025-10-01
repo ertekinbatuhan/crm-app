@@ -1,4 +1,6 @@
-class Reminder {
+import 'package:equatable/equatable.dart';
+
+class Reminder extends Equatable {
   final String id;
   final String title;
   final String? description;
@@ -55,28 +57,15 @@ class Reminder {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Reminder &&
-        other.id == id &&
-        other.title == title &&
-        other.description == description &&
-        other.time == time &&
-        other.isCompleted == isCompleted &&
-        other.type == type &&
-        other.priority == priority;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        title.hashCode ^
-        description.hashCode ^
-        time.hashCode ^
-        isCompleted.hashCode ^
-        type.hashCode ^
-        priority.hashCode;
-  }
+  List<Object?> get props => [
+        id,
+        title,
+        description,
+        time,
+        isCompleted,
+        type,
+        priority,
+      ];
 }
 
 enum ReminderType { proposal, followUp, deadline, meeting, general }

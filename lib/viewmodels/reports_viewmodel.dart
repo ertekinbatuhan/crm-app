@@ -4,11 +4,9 @@ import 'package:flutter/material.dart' show DateTimeRange;
 import '../models/deal_model.dart';
 import '../models/contact_model.dart';
 import '../models/task_model.dart';
-import '../models/meeting_model.dart';
 import '../services/deal_service.dart';
 import '../services/contact_service.dart';
 import '../services/task_service.dart';
-import '../services/meeting_service.dart';
 
 enum ReportsViewState { initial, loading, loaded, error }
 
@@ -16,28 +14,23 @@ class ReportsViewModel extends ChangeNotifier {
   final DealService _dealService;
   final ContactService _contactService;
   final TaskService _taskService;
-  final MeetingService _meetingService;
 
   StreamSubscription<List<Deal>>? _dealsSubscription;
   StreamSubscription<List<Contact>>? _contactsSubscription;
   StreamSubscription<List<Task>>? _tasksSubscription;
-  StreamSubscription<List<Meeting>>? _meetingsSubscription;
 
   ReportsViewModel({
     required DealService dealService,
     required ContactService contactService,
     required TaskService taskService,
-    required MeetingService meetingService,
   }) : _dealService = dealService,
        _contactService = contactService,
-       _taskService = taskService,
-       _meetingService = meetingService;
+       _taskService = taskService;
 
   ReportsViewState _state = ReportsViewState.initial;
   List<Deal> _deals = [];
   List<Contact> _contacts = [];
   List<Task> _tasks = [];
-  List<Meeting> _meetings = [];
   String _errorMessage = '';
   String _selectedPeriod = 'This Month'; // This Month, Last Month, This Year
 
@@ -45,7 +38,6 @@ class ReportsViewModel extends ChangeNotifier {
   List<Deal> get deals => _filteredDeals;
   List<Contact> get contacts => _filteredContacts;
   List<Task> get tasks => _filteredTasks;
-  List<Meeting> get meetings => _filteredMeetings;
   String get errorMessage => _errorMessage;
   String get selectedPeriod => _selectedPeriod;
   bool get isLoading => _state == ReportsViewState.loading;
@@ -55,7 +47,6 @@ class ReportsViewModel extends ChangeNotifier {
   List<Deal> _filteredDeals = [];
   List<Contact> _filteredContacts = [];
   List<Task> _filteredTasks = [];
-  List<Meeting> _filteredMeetings = [];
 
   Future<void> loadReportsData() async {
     if (_state == ReportsViewState.initial) {
@@ -78,10 +69,6 @@ class ReportsViewModel extends ChangeNotifier {
       _onTasksUpdated,
       onError: _onError,
     );
-    _meetingsSubscription ??= _meetingService.getMeetingsStream().listen(
-      _onMeetingsUpdated,
-      onError: _onError,
-    );
   }
 
   void _onDealsUpdated(List<Deal> deals) {
@@ -99,16 +86,10 @@ class ReportsViewModel extends ChangeNotifier {
     _applyFilters();
   }
 
-  void _onMeetingsUpdated(List<Meeting> meetings) {
-    _meetings = meetings;
-    _applyFilters();
-  }
-
   void _applyFilters() {
     if (_deals.isEmpty &&
         _contacts.isEmpty &&
-        _tasks.isEmpty &&
-        _meetings.isEmpty) {
+        _tasks.isEmpty) {
       if (_state != ReportsViewState.loading) {
         _setState(ReportsViewState.loading);
       }
@@ -135,10 +116,6 @@ class ReportsViewModel extends ChangeNotifier {
       if (date == null) return true;
       return _isWithinPeriod(date, periodRange);
     }).toList();
-
-    _filteredMeetings = _meetings
-        .where((meeting) => _isWithinPeriod(meeting.startTime, periodRange))
-        .toList();
 
     _setState(ReportsViewState.loaded);
   }
@@ -169,8 +146,6 @@ class ReportsViewModel extends ChangeNotifier {
   int get completedTasks => _tasks.where((task) => task.isCompleted).length;
 
   int get totalTasks => _tasks.length;
-
-  int get totalMeetings => _meetings.length;
 
   double get dealConversionRate {
     if (totalDeals == 0) return 0.0;
@@ -252,15 +227,6 @@ class ReportsViewModel extends ChangeNotifier {
     return result;
   }
 
-  Map<String, int> get meetingsByType {
-    final result = <String, int>{};
-    for (final meeting in _meetings) {
-      final key = meeting.type.displayName;
-      result[key] = (result[key] ?? 0) + 1;
-    }
-    return result;
-  }
-
   Map<String, int> get contactsByCompany {
     final result = <String, int>{};
     for (final contact in _contacts) {
@@ -308,7 +274,6 @@ class ReportsViewModel extends ChangeNotifier {
     _dealsSubscription?.cancel();
     _contactsSubscription?.cancel();
     _tasksSubscription?.cancel();
-    _meetingsSubscription?.cancel();
     super.dispose();
   }
 }

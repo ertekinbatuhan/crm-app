@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 
-class Task {
+class Task extends Equatable {
   final String id;
   final String title;
   final DateTime? dueDate;
@@ -139,36 +140,19 @@ class Task {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Task &&
-        other.id == id &&
-        other.title == title &&
-        other.dueDate == dueDate &&
-        other.isCompleted == isCompleted &&
-        other.type == type &&
-        other.priority == priority &&
-        other.associatedContactId == associatedContactId &&
-        other.associatedDealId == associatedDealId &&
-        other.description == description &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        title.hashCode ^
-        dueDate.hashCode ^
-        isCompleted.hashCode ^
-        type.hashCode ^
-        priority.hashCode ^
-        associatedContactId.hashCode ^
-        associatedDealId.hashCode ^
-        description.hashCode ^
-        createdAt.hashCode ^
-        updatedAt.hashCode;
-  }
+  List<Object?> get props => [
+        id,
+        title,
+        dueDate,
+        isCompleted,
+        type,
+        priority,
+        associatedContactId,
+        associatedDealId,
+        description,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 enum TaskPriority { low, medium, high, urgent }

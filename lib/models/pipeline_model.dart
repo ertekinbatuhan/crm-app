@@ -1,4 +1,6 @@
-class PipelineStage {
+import 'package:equatable/equatable.dart';
+
+class PipelineStage extends Equatable {
   final String name;
   final double progress;
   final double? value;
@@ -10,4 +12,7 @@ class PipelineStage {
     this.value,
     this.weight = 1,
   });
+
+  @override
+  List<Object?> get props => [name, progress, value, weight];
 }

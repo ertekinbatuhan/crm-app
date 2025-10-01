@@ -1,6 +1,8 @@
 import '../models/task_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
+import '../core/constants/firestore_constants.dart';
+import '../core/errors/exceptions.dart';
 
 abstract class TaskService {
   Future<List<Task>> getTasksOnce();
@@ -13,8 +15,11 @@ abstract class TaskService {
 }
 
 class FirebaseTaskService implements TaskService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'tasks';
+  final FirebaseFirestore _firestore;
+  static const String _collection = FirestoreCollections.tasks;
+
+  FirebaseTaskService([FirebaseFirestore? firestore])
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<List<Task>> getTasksOnce() async {
@@ -26,11 +31,14 @@ class FirebaseTaskService implements TaskService {
 
       return querySnapshot.docs.map((doc) {
         final data = doc.data();
-        data['id'] = doc.id;
-        return Task.fromMap(data);
+        return Task.fromMap({...data, 'id': doc.id});
       }).toList();
     } catch (e) {
-      throw Exception('Failed to fetch tasks: $e');
+      throw FirestoreException(
+        message: 'Failed to fetch tasks',
+        code: 'FETCH_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -51,11 +59,14 @@ class FirebaseTaskService implements TaskService {
 
       return querySnapshot.docs.map((doc) {
         final data = doc.data();
-        data['id'] = doc.id;
-        return Task.fromMap(data);
+        return Task.fromMap({...data, 'id': doc.id});
       }).toList();
     } catch (e) {
-      throw Exception('Failed to fetch tasks by date: $e');
+      throw FirestoreException(
+        message: 'Failed to fetch tasks by date',
+        code: 'FETCH_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -69,12 +80,15 @@ class FirebaseTaskService implements TaskService {
           .map((snapshot) {
             return snapshot.docs.map((doc) {
               final data = doc.data();
-              data['id'] = doc.id;
-              return Task.fromMap(data);
+              return Task.fromMap({...data, 'id': doc.id});
             }).toList();
           });
     } catch (e) {
-      throw Exception('Failed to stream tasks: $e');
+      throw FirestoreException(
+        message: 'Failed to stream tasks',
+        code: 'STREAM_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -92,7 +106,11 @@ class FirebaseTaskService implements TaskService {
 
       return task.copyWith(id: taskId, createdAt: now, updatedAt: now);
     } catch (e) {
-      throw Exception('Failed to create task: $e');
+      throw FirestoreException(
+        message: 'Failed to create task',
+        code: 'CREATE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -100,7 +118,7 @@ class FirebaseTaskService implements TaskService {
   Future<Task> updateTask(Task task) async {
     try {
       if (task.id.isEmpty) {
-        throw Exception('Task ID cannot be empty');
+        throw ValidationException.requiredField('task.id');
       }
 
       final now = DateTime.now();
@@ -110,8 +128,14 @@ class FirebaseTaskService implements TaskService {
       await _firestore.collection(_collection).doc(task.id).update(taskData);
 
       return task.copyWith(updatedAt: now);
+    } on ValidationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Failed to update task: $e');
+      throw FirestoreException(
+        message: 'Failed to update task',
+        code: 'UPDATE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -119,12 +143,18 @@ class FirebaseTaskService implements TaskService {
   Future<void> deleteTask(String taskId) async {
     try {
       if (taskId.isEmpty) {
-        throw Exception('Task ID cannot be empty');
+        throw ValidationException.requiredField('taskId');
       }
 
       await _firestore.collection(_collection).doc(taskId).delete();
+    } on ValidationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Failed to delete task: $e');
+      throw FirestoreException(
+        message: 'Failed to delete task',
+        code: 'DELETE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -135,7 +165,7 @@ class FirebaseTaskService implements TaskService {
       final docSnapshot = await docRef.get();
 
       if (!docSnapshot.exists) {
-        throw Exception('Task not found');
+        throw FirestoreException.notFound();
       }
 
       final data = docSnapshot.data()!;
@@ -151,8 +181,14 @@ class FirebaseTaskService implements TaskService {
       await docRef.update(updateData);
 
       return updatedTask;
+    } on FirestoreException {
+      rethrow;
     } catch (e) {
-      throw Exception('Failed to toggle task completion: $e');
+      throw FirestoreException(
+        message: 'Failed to toggle task completion',
+        code: 'UPDATE_ERROR',
+        originalError: e,
+      );
     }
   }
 }

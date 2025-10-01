@@ -6,15 +6,12 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutterprojects/app/app.dart';
 import 'package:flutterprojects/core/di/service_locator.dart';
 import 'package:flutterprojects/services/task_service.dart';
-import 'package:flutterprojects/services/meeting_service.dart';
 import 'package:flutterprojects/services/contact_service.dart';
 import 'package:flutterprojects/services/deal_service.dart';
 import 'package:flutterprojects/models/task_model.dart';
-import 'package:flutterprojects/models/meeting_model.dart';
 import 'package:flutterprojects/models/contact_model.dart';
 import 'package:flutterprojects/models/deal_model.dart';
 import 'package:flutterprojects/core/repositories/contact_repository.dart';
@@ -93,58 +90,6 @@ class _FakeTaskService implements TaskService {
   @override
   Future<Task> updateTask(Task task) async =>
       task.copyWith(updatedAt: DateTime.now());
-}
-
-class _FakeMeetingService implements MeetingService {
-  final DateTime _now = DateTime(2025, 9, 27, 10, 0);
-
-  List<Meeting> get _sampleMeetings => [
-    Meeting(
-      id: 'm1',
-      title: 'Client Sync',
-      startTime: _now.add(const Duration(hours: 2)),
-      endTime: _now.add(const Duration(hours: 3)),
-      participants: const ['Alice'],
-      type: MeetingType.client,
-      createdAt: _now.subtract(const Duration(days: 1)),
-      updatedAt: _now,
-    ),
-  ];
-
-  @override
-  Future<Meeting> createMeeting(Meeting meeting) async => meeting.copyWith(
-    id: 'newMeeting',
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  );
-
-  @override
-  Future<void> deleteMeeting(String meetingId) async {}
-
-  @override
-  Future<List<Meeting>> getMeetings() async => _sampleMeetings;
-
-  @override
-  Future<List<Meeting>> getMeetingsOnce() async => _sampleMeetings;
-
-  @override
-  Future<List<Meeting>> getMeetingsByDate(DateTime date) async {
-    return _sampleMeetings
-        .where(
-          (meeting) =>
-              meeting.startTime.year == date.year &&
-              meeting.startTime.month == date.month &&
-              meeting.startTime.day == date.day,
-        )
-        .toList();
-  }
-
-  @override
-  Future<Meeting> updateMeeting(Meeting meeting) async =>
-      meeting.copyWith(updatedAt: DateTime.now());
-
-  @override
-  Stream<List<Meeting>> getMeetingsStream() => Stream.value(_sampleMeetings);
 }
 
 class _FakeContactService implements ContactService {
@@ -232,9 +177,6 @@ Future<void> _configureServiceLocatorForTests() async {
   await serviceLocator.reset();
 
   serviceLocator.registerLazySingleton<TaskService>(() => _FakeTaskService());
-  serviceLocator.registerLazySingleton<MeetingService>(
-    () => _FakeMeetingService(),
-  );
   serviceLocator.registerLazySingleton<ContactService>(
     () => _FakeContactService(),
   );
@@ -255,7 +197,6 @@ Future<void> _configureServiceLocatorForTests() async {
       taskService: serviceLocator.get<TaskService>(),
       contactService: serviceLocator.get<ContactService>(),
       dealService: serviceLocator.get<DealService>(),
-      meetingService: serviceLocator.get<MeetingService>(),
     ),
   );
   serviceLocator.registerFactory<DealsViewModel>(
@@ -266,13 +207,11 @@ Future<void> _configureServiceLocatorForTests() async {
       dealService: serviceLocator.get<DealService>(),
       contactService: serviceLocator.get<ContactService>(),
       taskService: serviceLocator.get<TaskService>(),
-      meetingService: serviceLocator.get<MeetingService>(),
     ),
   );
   serviceLocator.registerLazySingleton<TasksViewModel>(
     () => TasksViewModel(
       taskService: serviceLocator.get<TaskService>(),
-      meetingService: serviceLocator.get<MeetingService>(),
       contactService: serviceLocator.get<ContactService>(),
       dealService: serviceLocator.get<DealService>(),
     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_logger.dart';
 
 class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -27,8 +28,7 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.black, size: 24),
           onPressed: onSettingsPressed ?? () {
-
-            print('Settings pressed');
+            appLogger.d('Settings pressed');
           },
         ),
       ],

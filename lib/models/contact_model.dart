@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 
-class Contact {
+class Contact extends Equatable {
   final String id;
   final String name;
   final String? email;
@@ -66,31 +67,9 @@ class Contact {
     );
   }
 
-  // Override equality and hashCode for proper comparison
+  // Equatable props for value comparison
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Contact &&
-        other.id == id &&
-        other.name == name &&
-        other.email == email &&
-        other.phone == phone &&
-        other.company == company &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
-  }
-
-  // Override hashCode for proper comparison
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
-        email.hashCode ^
-        phone.hashCode ^
-        company.hashCode ^
-        createdAt.hashCode ^
-        updatedAt.hashCode;
-  }
+  List<Object?> get props => [id, name, email, phone, company, createdAt, updatedAt];
 
   // Override toString for better debugging
   @override

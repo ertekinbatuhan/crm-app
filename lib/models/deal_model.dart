@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 
-class Deal {
+class Deal extends Equatable {
   final String id;
   final String title;
   final double value;
@@ -72,31 +73,9 @@ class Deal {
     );
   }
 
+  // Equatable props for value comparison
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Deal &&
-        other.id == id &&
-        other.title == title &&
-        other.value == value &&
-        other.description == description &&
-        other.status == status &&
-        other.closeDate == closeDate &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        title.hashCode ^
-        value.hashCode ^
-        description.hashCode ^
-        status.hashCode ^
-        closeDate.hashCode ^
-        createdAt.hashCode ^
-        updatedAt.hashCode;
-  }
+  List<Object?> get props => [id, title, value, description, status, closeDate, createdAt, updatedAt];
 
   /// Calculates automatic closeDate based on deal status
   static DateTime calculateCloseDate(DealStatus status) {

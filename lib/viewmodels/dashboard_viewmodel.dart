@@ -3,9 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../models/task_model.dart';
 import '../models/contact_model.dart';
 import '../models/deal_model.dart';
-import '../models/meeting_model.dart';
-import '../core/repositories/contact_repository.dart';
-import '../core/repositories/deal_repository.dart';
 import '../core/utils/deal_extensions.dart';
 import '../models/stat_model.dart';
 import '../models/pipeline_model.dart';
@@ -13,7 +10,6 @@ import '../models/notification_model.dart';
 import '../services/task_service.dart';
 import '../services/contact_service.dart';
 import '../services/deal_service.dart';
-import '../services/meeting_service.dart';
 
 enum DashboardViewState { initial, loading, loaded, error }
 
@@ -21,22 +17,18 @@ class DashboardViewModel extends ChangeNotifier {
   final TaskService _taskService;
   final ContactService _contactService;
   final DealService _dealService;
-  final MeetingService _meetingService;
 
   StreamSubscription<List<Task>>? _tasksSubscription;
   StreamSubscription<List<Deal>>? _dealsSubscription;
   StreamSubscription<List<Contact>>? _contactsSubscription;
-  StreamSubscription<List<Meeting>>? _meetingsSubscription;
 
   DashboardViewModel({
     required TaskService taskService,
     required ContactService contactService,
     required DealService dealService,
-    required MeetingService meetingService,
   }) : _taskService = taskService,
        _contactService = contactService,
-       _dealService = dealService,
-       _meetingService = meetingService {
+       _dealService = dealService {
     _listenToStreams();
   }
 
@@ -44,14 +36,12 @@ class DashboardViewModel extends ChangeNotifier {
   List<Task> _recentTasks = [];
   List<Contact> _recentContacts = [];
   List<Deal> _recentDeals = [];
-  List<Meeting> _upcomingMeetings = [];
   String _errorMessage = '';
 
   DashboardViewState get state => _state;
   List<Task> get recentTasks => _recentTasks;
   List<Contact> get recentContacts => _recentContacts;
   List<Deal> get recentDeals => _recentDeals;
-  List<Meeting> get upcomingMeetings => _upcomingMeetings;
   String get errorMessage => _errorMessage;
   bool get isLoading => _state == DashboardViewState.loading;
   bool get hasError => _state == DashboardViewState.error;
@@ -77,13 +67,6 @@ class DashboardViewModel extends ChangeNotifier {
         _recentContacts = contacts;
         _updateStateIfReady();
       }, onError: _handleStreamError);
-
-      _meetingsSubscription = _meetingService.getMeetingsStream().listen((
-        meetings,
-      ) {
-        _upcomingMeetings = meetings;
-        _updateStateIfReady();
-      }, onError: _handleStreamError);
     } catch (e) {
       _setError(e.toString());
     }
@@ -92,8 +75,7 @@ class DashboardViewModel extends ChangeNotifier {
   void _updateStateIfReady() {
     if (_recentTasks.isEmpty &&
         _recentDeals.isEmpty &&
-        _recentContacts.isEmpty &&
-        _upcomingMeetings.isEmpty) {
+        _recentContacts.isEmpty) {
       return;
     }
     _setState(DashboardViewState.loaded);
@@ -136,12 +118,6 @@ class DashboardViewModel extends ChangeNotifier {
 
   int get totalContacts => _recentContacts.length;
 
-  int get todayMeetings => _upcomingMeetings
-      .where((meeting) => _isSameDay(meeting.startTime))
-      .length;
-
-  int get upcomingMeetingsCount => _upcomingMeetings.length;
-
   int get openDealsCount =>
       _recentDeals.where((deal) => deal.status != DealStatus.closed).length;
 
@@ -181,15 +157,6 @@ class DashboardViewModel extends ChangeNotifier {
     return closed / _recentDeals.length;
   }
 
-  double get upcomingMeetingsHours {
-    if (_upcomingMeetings.isEmpty) return 0.0;
-    final totalMinutes = _upcomingMeetings.fold<int>(
-      0,
-      (acc, meeting) => acc + meeting.duration.inMinutes,
-    );
-    return totalMinutes / 60;
-  }
-
   String get mostActiveContactName {
     if (_recentContacts.isEmpty || _recentTasks.isEmpty) return '';
 
@@ -218,13 +185,6 @@ class DashboardViewModel extends ChangeNotifier {
   List<Task> get highPriorityTasks => _recentTasks
       .where((task) => task.priority == TaskPriority.high && !task.isCompleted)
       .toList();
-
-  bool _isSameDay(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
-  }
 
   List<StatModel> get dashboardStats {
     return [
@@ -283,16 +243,6 @@ class DashboardViewModel extends ChangeNotifier {
               avatar: task.title.isNotEmpty ? task.title[0].toUpperCase() : 'T',
             ),
           ),
-      ...upcomingMeetings
-          .take(2)
-          .map(
-            (meeting) => NotificationModel(
-              title: meeting.title,
-              subtitle:
-                  'Time: ${_formatDate(meeting.startTime)} ${meeting.timeRange}',
-              avatar: 'M',
-            ),
-          ),
     ];
   }
 
@@ -305,7 +255,6 @@ class DashboardViewModel extends ChangeNotifier {
     _tasksSubscription?.cancel();
     _dealsSubscription?.cancel();
     _contactsSubscription?.cancel();
-    _meetingsSubscription?.cancel();
     super.dispose();
   }
 }

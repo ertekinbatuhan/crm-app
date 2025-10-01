@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_logger.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -73,7 +74,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             size: 24,
           ),
           onPressed: onSettingsPressed ?? () {
-            print('Settings pressed');
+            appLogger.d('Settings pressed');
           },
         ),
       ],

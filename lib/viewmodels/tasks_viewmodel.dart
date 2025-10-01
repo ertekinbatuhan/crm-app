@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
-import '../models/meeting_model.dart';
 import '../models/contact_model.dart';
 import '../models/deal_model.dart';
 import '../services/task_service.dart';
-import '../services/meeting_service.dart';
 import '../services/contact_service.dart';
 import '../services/deal_service.dart';
 import '../core/components/modal/add_task_modal.dart';
@@ -18,7 +16,6 @@ enum TasksViewModelState { initial, loading, loaded, error }
 
 class TasksViewModel extends ChangeNotifier {
   final TaskService _taskService;
-  final MeetingService _meetingService;
   final ContactService _contactService;
   final DealService _dealService;
 
@@ -26,11 +23,9 @@ class TasksViewModel extends ChangeNotifier {
 
   TasksViewModel({
     required TaskService taskService,
-    required MeetingService meetingService,
     required ContactService contactService,
     required DealService dealService,
   }) : _taskService = taskService,
-       _meetingService = meetingService,
        _contactService = contactService,
        _dealService = dealService;
 
@@ -38,8 +33,6 @@ class TasksViewModel extends ChangeNotifier {
   TasksViewModelState _state = TasksViewModelState.initial;
   List<Task> _tasks = [];
   List<Task> _filteredTasks = [];
-  List<Meeting> _meetings = [];
-  List<Meeting> _todayMeetings = [];
   List<Contact> _contacts = [];
   List<Deal> _deals = [];
   DateTime _selectedDate = DateTime.now();
@@ -51,8 +44,6 @@ class TasksViewModel extends ChangeNotifier {
   TasksViewModelState get state => _state;
   List<Task> get tasks => _filteredTasks;
   List<Task> get allTasks => _tasks;
-  List<Meeting> get meetings => _meetings;
-  List<Meeting> get todayMeetings => _todayMeetings;
   List<Contact> get contacts => _contacts;
   List<Deal> get deals => _deals;
   DateTime get selectedDate => _selectedDate;
@@ -81,25 +72,21 @@ class TasksViewModel extends ChangeNotifier {
     try {
       final results = await Future.wait([
         _taskService.getTasksStream().first,
-        _meetingService.getMeetingsStream().first,
         _contactService.getContactsStream().first,
         _dealService.getDealsStream().first,
       ]);
 
       _tasks = (results[0] as List<Task>)..sort(_sortByDueDate);
-      _meetings = results[1] as List<Meeting>;
-      _contacts = results[2] as List<Contact>;
-      _deals = results[3] as List<Deal>;
+      _contacts = results[1] as List<Contact>;
+      _deals = results[2] as List<Deal>;
 
       _applyFilters();
-      _loadTodayMeetings();
       _setState(TasksViewModelState.loaded);
 
       _tasksSubscription = _taskService.getTasksStream().listen(
         (tasks) {
           _tasks = [...tasks]..sort(_sortByDueDate);
           _applyFilters();
-          _loadTodayMeetings();
           if (_state != TasksViewModelState.loaded) {
             _state = TasksViewModelState.loaded;
           }
@@ -317,18 +304,6 @@ class TasksViewModel extends ChangeNotifier {
     }
   }
 
-  void _loadTodayMeetings() {
-    final today = DateTime.now();
-    _todayMeetings = _meetings
-        .where(
-          (meeting) =>
-              meeting.startTime.year == today.year &&
-              meeting.startTime.month == today.month &&
-              meeting.startTime.day == today.day,
-        )
-        .toList();
-  }
-
   int _sortByDueDate(Task a, Task b) {
     if (a.dueDate == null && b.dueDate == null) {
       return a.title.compareTo(b.title);
@@ -444,17 +419,6 @@ class TasksViewModel extends ChangeNotifier {
 
   List<Task> get selectedDateTasks {
     return getTasksForDate(_selectedDate);
-  }
-
-  List<Meeting> get selectedDateMeetings {
-    return _meetings
-        .where(
-          (meeting) =>
-              meeting.startTime.year == _selectedDate.year &&
-              meeting.startTime.month == _selectedDate.month &&
-              meeting.startTime.day == _selectedDate.day,
-        )
-        .toList();
   }
 
   // Helper methods

@@ -2,7 +2,6 @@ import 'package:get_it/get_it.dart';
 import '../../services/contact_service.dart';
 import '../../services/deal_service.dart';
 import '../../services/task_service.dart';
-import '../../services/meeting_service.dart';
 import '../../viewmodels/contacts_viewmodel.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/deals_viewmodel.dart';
@@ -10,12 +9,13 @@ import '../../viewmodels/reports_viewmodel.dart';
 import '../../viewmodels/tasks_viewmodel.dart';
 import '../repositories/contact_repository.dart';
 import '../repositories/deal_repository.dart';
+import '../repositories/task_repository.dart';
 
 final GetIt serviceLocator = GetIt.instance;
 
 class ServiceLocator {
   static void setup() {
-    // Register Firebase services directly
+    // Register Firebase services
     serviceLocator.registerLazySingleton<ContactService>(
       () => FirebaseContactService(),
     );
@@ -25,11 +25,8 @@ class ServiceLocator {
     serviceLocator.registerLazySingleton<TaskService>(
       () => FirebaseTaskService(),
     );
-    serviceLocator.registerLazySingleton<MeetingService>(
-      () => FirebaseMeetingService(),
-    );
     
-
+    // Register Repositories
     serviceLocator.registerLazySingleton<ContactRepository>(
       () => ContactRepositoryImpl(serviceLocator.get<ContactService>()),
     );
@@ -38,7 +35,11 @@ class ServiceLocator {
       () => DealRepositoryImpl(serviceLocator.get<DealService>()),
     );
     
-
+    serviceLocator.registerLazySingleton<TaskRepository>(
+      () => TaskRepositoryImpl(serviceLocator.get<TaskService>()),
+    );
+    
+    // Register ViewModels
     serviceLocator.registerLazySingleton<ContactsViewModel>(
       () => ContactsViewModel(serviceLocator.get<ContactRepository>()),
     );
@@ -47,7 +48,6 @@ class ServiceLocator {
         taskService: serviceLocator.get<TaskService>(),
         contactService: serviceLocator.get<ContactService>(),
         dealService: serviceLocator.get<DealService>(),
-        meetingService: serviceLocator.get<MeetingService>(),
       ),
     );
     serviceLocator.registerFactory<DealsViewModel>(
@@ -58,13 +58,11 @@ class ServiceLocator {
         dealService: serviceLocator.get<DealService>(),
         contactService: serviceLocator.get<ContactService>(),
         taskService: serviceLocator.get<TaskService>(),
-        meetingService: serviceLocator.get<MeetingService>(),
       ),
     );
     serviceLocator.registerLazySingleton<TasksViewModel>(
       () => TasksViewModel(
         taskService: serviceLocator.get<TaskService>(),
-        meetingService: serviceLocator.get<MeetingService>(),
         contactService: serviceLocator.get<ContactService>(),
         dealService: serviceLocator.get<DealService>(),
       ),

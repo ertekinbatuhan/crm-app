@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import '../models/contact_model.dart';
+import '../core/constants/firestore_constants.dart';
+import '../core/errors/exceptions.dart';
 
 abstract class ContactService {
   Stream<List<Contact>> getContactsStream();
@@ -11,8 +13,11 @@ abstract class ContactService {
 }
 
 class FirebaseContactService implements ContactService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collection = 'contacts';
+  final FirebaseFirestore _firestore;
+  final String _collection = FirestoreCollections.contacts;
+
+  FirebaseContactService([FirebaseFirestore? firestore])
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Stream<List<Contact>> getContactsStream() {
@@ -21,13 +26,16 @@ class FirebaseContactService implements ContactService {
         (QuerySnapshot snapshot) {
           return snapshot.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            data['id'] = doc.id;
-            return Contact.fromMap(data);
+            return Contact.fromMap({...data, 'id': doc.id});
           }).toList();
         },
       );
     } catch (e) {
-      throw Exception('Error streaming contacts: $e');
+      throw FirestoreException(
+        message: 'Error streaming contacts',
+        code: 'STREAM_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -41,11 +49,14 @@ class FirebaseContactService implements ContactService {
 
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return Contact.fromMap(data);
+        return Contact.fromMap({...data, 'id': doc.id});
       }).toList();
     } catch (e) {
-      throw Exception('Error fetching contacts: $e');
+      throw FirestoreException(
+        message: 'Error fetching contacts',
+        code: 'FETCH_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -68,7 +79,11 @@ class FirebaseContactService implements ContactService {
 
       return contactWithId;
     } catch (e) {
-      throw Exception('Error creating contact: $e');
+      throw FirestoreException(
+        message: 'Error creating contact',
+        code: 'CREATE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -76,7 +91,7 @@ class FirebaseContactService implements ContactService {
   Future<Contact> updateContact(Contact contact) async {
     try {
       if (contact.id.isEmpty) {
-        throw Exception('Contact ID cannot be empty');
+        throw ValidationException.requiredField('contact.id');
       }
 
       final now = DateTime.now();
@@ -90,8 +105,14 @@ class FirebaseContactService implements ContactService {
           .update(contactData);
 
       return updatedContact;
+    } on ValidationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error updating contact: $e');
+      throw FirestoreException(
+        message: 'Error updating contact',
+        code: 'UPDATE_ERROR',
+        originalError: e,
+      );
     }
   }
 
@@ -99,12 +120,18 @@ class FirebaseContactService implements ContactService {
   Future<void> deleteContact(String contactId) async {
     try {
       if (contactId.isEmpty) {
-        throw Exception('Contact ID cannot be empty');
+        throw ValidationException.requiredField('contactId');
       }
 
       await _firestore.collection(_collection).doc(contactId).delete();
+    } on ValidationException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error deleting contact: $e');
+      throw FirestoreException(
+        message: 'Error deleting contact',
+        code: 'DELETE_ERROR',
+        originalError: e,
+      );
     }
   }
 }

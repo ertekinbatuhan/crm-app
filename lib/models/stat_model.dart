@@ -1,4 +1,6 @@
-class StatModel {
+import 'package:equatable/equatable.dart';
+
+class StatModel extends Equatable {
   final String title;
   final String value;
   final String? changeLabel;
@@ -25,4 +27,13 @@ class StatModel {
   }
 
   bool get hasChange => formattedChange.isNotEmpty;
+
+  @override
+  List<Object?> get props => [
+        title,
+        value,
+        changeLabel,
+        changeValue,
+        isPositive,
+      ];
 }
