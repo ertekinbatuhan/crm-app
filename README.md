@@ -31,7 +31,7 @@ The application follows the MVVM (Model-View-ViewModel) architectural pattern wi
 ┌─────────────────────────────────────────────────────────────┐
 │                        Presentation Layer                   │
 ├─────────────────────────────────────────────────────────────┤
-│  Views (UI)  │  ViewModels (Business Logic)  │  Components   │
+│  Views (UI)  │  ViewModels (Business Logic)  │  Components  │
 ├─────────────────────────────────────────────────────────────┤
 │                        Service Layer                        │
 ├─────────────────────────────────────────────────────────────┤
